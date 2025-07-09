@@ -71,42 +71,97 @@ function initSidebarMobile() {
 
 // ========== SIDEBAR & LEGAL SECTIONS SYSTEM ==========
 
+const activeSectionStates = {
+    everything: true,
+    alarm: false,
+    stopwatch: false,
+    timer: false,
+    worldClock: false,
+    'privacy-policy': false,
+    'terms-conditions': false,
+    'cookies-policy': false
+};
+
+const iconToSection = {
+    'home': 'everything',
+    'alarm': 'alarm',
+    'timelapse': 'stopwatch',
+    'timer': 'timer',
+    'schedule': 'worldClock',
+    'policy': 'privacy-policy',
+    'gavel': 'terms-conditions',
+    'cookie': 'cookies-policy'
+};
+
+
 const sectionStates = {
     currentView: 'tools', // Puede ser 'tools' o 'legal'
     activeSection: 'everything'
 };
 
-function activateSection(sectionName) {
-    if (sectionStates.activeSection === sectionName) return;
+function logSectionStates() {
+    console.groupCollapsed('📋 Current Section States');
+    const statesForTable = {};
+    const sections = Object.keys(activeSectionStates);
+    for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
+        statesForTable[section.toUpperCase()] = {
+            Status: activeSectionStates[section] ? '✅ ACTIVE' : '❌ INACTIVE'
+        };
+    }
+    console.table(statesForTable);
+    console.groupEnd();
+}
 
-    // Ocultar la sección anterior
+function activateSection(sectionName, showLog = true) {
+    if (activeSectionStates[sectionName] === true) {
+        return;
+    }
+
+    // Desactivar todas las secciones en el estado
+    for (const section in activeSectionStates) {
+        activeSectionStates[section] = false;
+    }
+
+    // Activar la nueva sección
+    if (activeSectionStates.hasOwnProperty(sectionName)) {
+        activeSectionStates[sectionName] = true;
+        sectionStates.activeSection = sectionName;
+    }
+
+    // Ocultar la sección anterior en el DOM
     const oldSection = document.querySelector(`.section-content > .active`);
     if (oldSection) {
         oldSection.classList.remove('active');
         oldSection.classList.add('disabled');
     }
 
-    // Mostrar la nueva sección
+    // Mostrar la nueva sección en el DOM
     const newSection = document.querySelector(`.section-content > .section-${sectionName}, .section-content > [data-section="${sectionName}"]`);
     if (newSection) {
         newSection.classList.remove('disabled');
         newSection.classList.add('active');
-        sectionStates.activeSection = sectionName;
     } else {
         console.warn(`Sección "${sectionName}" no encontrada.`);
     }
 
     updateSidebarButtons(sectionName);
 
+    if (showLog) {
+        logSectionStates();
+    }
+
     const event = new CustomEvent('sectionChanged', {
-        detail: { activeSection: sectionName, view: sectionStates.currentView }
+        detail: { activeSection: sectionName, view: sectionStates.currentView, states: activeSectionStates }
     });
     document.dispatchEvent(event);
 }
 
+
 function updateSidebarButtons(activeSection) {
     document.querySelectorAll('.sidebar-button').forEach(button => {
-        if (button.dataset.sectionName === activeSection) {
+        const sectionName = button.dataset.sectionName;
+        if (sectionName === activeSection) {
             button.classList.add('active');
         } else {
             button.classList.remove('active');
@@ -122,12 +177,12 @@ function switchToLegalView(sectionName) {
     activateSection(sectionName);
 }
 
-function switchToToolsView() {
+function switchToToolsView(showLog = false) { // <--- Se añade el parámetro
     sectionStates.currentView = 'tools';
     document.querySelectorAll('.section-legal-content').forEach(s => s.classList.add('disabled'));
     document.querySelectorAll('.sidebar-legal-options').forEach(s => s.classList.add('disabled'));
     document.querySelectorAll('.sidebar-top').forEach(s => s.classList.remove('disabled'));
-    activateSection('everything');
+    activateSection('everything', showLog); // <--- Se pasa el parámetro
 }
 
 function initSectionManagement() {
@@ -160,15 +215,15 @@ function initSectionManagement() {
             const action = button.dataset.action;
             const sectionName = button.dataset.sectionName;
             if (action === 'back-to-tools') {
-                switchToToolsView();
+                switchToToolsView(true); // <--- Se llama con 'true' para mostrar el log
             } else if (sectionName) {
                 activateSection(sectionName);
             }
         });
     });
 
-    // Estado inicial
-    switchToToolsView();
+    // Estado inicial (sin log)
+    switchToToolsView(false);
 }
 
 
@@ -177,6 +232,19 @@ function initSectionManagement() {
 function getActiveSection() {
     return sectionStates.activeSection;
 }
+
+function getAllSectionStates() {
+    return { ...activeSectionStates };
+}
+
+function switchToSection(sectionName) {
+    if (activeSectionStates.hasOwnProperty(sectionName)) {
+        activateSection(sectionName);
+        return true;
+    }
+    return false;
+}
+
 
 // ========== INITIALIZATION - DELEGATED TO MODULE MANAGER ==========
 
@@ -314,6 +382,7 @@ function switchControlCenterMenu(menuName) {
 
 function logAllStates() {
     console.group('🌙 ProjectNocturne - Complete System Status');
+    logSectionStates();
     logModuleStates();
     console.log('📊 Active Module:', getActiveModule() || 'None');
     console.log('📊 Any Module Active:', isAnyModuleActive());
@@ -326,7 +395,8 @@ function logAllStates() {
 function getSystemStatus() {
     return {
         sections: {
-            active: getActiveSection()
+            active: getActiveSection(),
+            all: getAllSectionStates()
         },
         modules: {
             active: getActiveModule(),
@@ -481,9 +551,6 @@ function getAppliedTextStyle() {
 // ========== INITIALIZE TEXT STYLE MANAGER ==========
 document.addEventListener('DOMContentLoaded', initializeTextStyleManager);
 
-// Call initSectionManagement after the DOM is loaded
-document.addEventListener('DOMContentLoaded', initSectionManagement);
-
 
 // ========== EXPORTS - COMPLETE AND UNIFIED FUNCTIONS ==========
 
@@ -491,14 +558,14 @@ export {
     activateControlCenterMenu, activateModuleByName as activateModule, activateSection, activateSpecificOverlay,
     closeActiveModule, closeAllModules, closeControlCenter, closeOverlayByName, closeOverlays,
     deactivateModule, dispatchModuleEvent, executeWhenModuleReady, getActiveModule, getActiveSection,
-    getAppliedColor, getAppliedFontScale, getAppliedTextStyle, getCurrentActiveOverlay,
+    getAllSectionStates, getAppliedColor, getAppliedFontScale, getAppliedTextStyle, getCurrentActiveOverlay,
     getModuleInfo, getModulePreference, getSystemStatus, initControlCenter, initNewOverlayModules,
     initSidebarMobile, initSectionManagement as initSidebarSections, isAnyModuleActive, isAnyOverlayActive, isControlCenterActive
 };
 
 export {
-    isModuleActive, isModuleBusy, isModuleCurrentlyChanging, logAllStates, logModuleStates,
+    isModuleActive, isModuleBusy, isModuleCurrentlyChanging, logAllStates, logModuleStates, logSectionStates,
     onModuleActivated, onModuleDeactivated, onOverlayChanged, resetModuleChangeFlag, setModulePreference,
-    showControlCenterMenu, showSpecificOverlay, switchControlCenterMenu, switchOverlay,
+    showControlCenterMenu, showSpecificOverlay, switchControlCenterMenu, switchOverlay, switchToSection,
     toggleModuleByName as toggleModule, waitForModuleReady
 };
