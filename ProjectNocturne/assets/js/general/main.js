@@ -253,6 +253,25 @@ function switchToSection(sectionName) {
     return false;
 }
 
+export function toggleTimeFormat() {
+    use24HourFormat = !use24HourFormat;
+    updateTimeFormatInAllSections();
+}
+
+function updateTimeFormatInAllSections() {
+    // Aquí llamarías a las funciones de actualización de cada sección
+    if (window.alarmManager && typeof window.alarmManager.renderAllAlarmCards === 'function') {
+        window.alarmManager.renderAllAlarmCards();
+    }
+    if (window.timerManager && typeof window.timerManager.renderAllTimerCards === 'function') {
+        window.timerManager.renderAllTimerCards();
+    }
+    if (window.worldClockManager && typeof window.worldClockManager.updateExistingCardsTranslations === 'function') {
+        window.worldClockManager.updateExistingCardsTranslations();
+    }
+    // Para el widget principal, la actualización es manejada por su propio intervalo
+}
+
 
 // ========== INITIALIZATION - DELEGATED TO MODULE MANAGER ==========
 

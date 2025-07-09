@@ -1,5 +1,5 @@
 import { getTranslation, translateElementTree } from '../general/translations-controller.js';
-import { use24HourFormat, toggleModule } from '../general/main.js';
+import { use24HourFormat, toggleModule, toggleTimeFormat } from '../general/main.js';
 import { refreshTooltips } from '../general/tooltip-controller.js';
 
 const WIDGET_DEFINITIONS = {
@@ -13,6 +13,9 @@ const WIDGET_DEFINITIONS = {
             <div class="add-button-container">
                 <button class="header-button add-btn" data-action="toggle-add-menu" data-translate="add_element" data-translate-category="tooltips" data-translate-target="tooltip">
                     <span class="material-symbols-rounded">add</span>
+                </button>
+                <button class="header-button" data-action="toggle-time-format" data-translate="change_format" data-translate-category="tooltips" data-translate-target="tooltip">
+                    <span class="material-symbols-rounded">schedule</span>
                 </button>
                 <div class="dropdown-menu-container add-menu-custom disabled">
                     <div class="menu-list">
@@ -73,6 +76,14 @@ function rebindEventListeners() {
             if (menu) {
                 menu.classList.toggle('disabled');
             }
+        });
+    }
+
+    const timeFormatButton = document.querySelector('[data-action="toggle-time-format"]');
+    if (timeFormatButton) {
+        timeFormatButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleTimeFormat();
         });
     }
 
