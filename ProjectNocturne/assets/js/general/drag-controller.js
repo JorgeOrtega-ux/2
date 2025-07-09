@@ -242,7 +242,7 @@ function getModuleFromDragTarget(dragTarget) {
 
     const overlayModule = dragTarget.closest('.module-overlay');
     if (overlayModule) {
-        const activeOverlayMenu = overlayModule.querySelector('.menu-alarm.active, .menu-timer.active, .menu-worldClock.active, .menu-paletteColors.active, .menu-sounds.active, .menu-country.active, .menu-timezone.active, .menu-calendar.active, .menu-time-picker.active');
+     const activeOverlayMenu = overlayModule.querySelector('.menu-alarm.active, .menu-timer.active, .menu-worldClock.active, .menu-paletteColors.active, .menu-sounds.active, .menu-country.active, .menu-timezone.active, .menu-calendar.active, .menu-time-picker.active, .menu-delete.active, .menu-suggestions.active, .menu-suggestion-types.active');
         if (activeOverlayMenu) {
             return {
                 module: overlayModule,

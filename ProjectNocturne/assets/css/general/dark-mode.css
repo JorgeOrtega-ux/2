@@ -166,7 +166,10 @@
 .dark-mode .menu-country,
 .dark-mode .menu-timeZone,
 .dark-mode .menu-timePicker,
-.dark-mode .menu-calendar {
+.dark-mode .menu-calendar,
+.dark-mode .menu-delete,
+.dark-mode .menu-suggestions,
+.dark-mode .menu-suggestion-types {
     color: #ffffff;
     background-color: #252627;
     border-color: #ffffff20;

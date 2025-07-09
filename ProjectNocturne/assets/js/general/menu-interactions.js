@@ -567,7 +567,6 @@ export function prepareWorldClockForEdit(clockData) {
     const timezoneSelector = menuElement.querySelector('[data-action="open-timezone-menu"]');
     if (timezoneSelector) {
         timezoneSelector.classList.remove('disabled-interactive'); // <--- ¡Esta es la línea clave!
-        console.log("dd");
     }
     const ct = window.ct;
     const tzObject = ct.getTimezone(clockData.timezone);
@@ -598,8 +597,14 @@ const initializeTimerMenu = (menuElement) => {
 };
 
 const initializeWorldClockMenu = (menuElement) => {
-    const timezoneSelector = menuElement.querySelector('[data-action="open-timezone-menu"]');
-    if (timezoneSelector) timezoneSelector.classList.add('disabled-interactive');
+    // Solo deshabilita el selector si NO estamos en modo de edición.
+    // La función prepareWorldClockForEdit añade el atributo 'data-editing-id'.
+    if (!menuElement.hasAttribute('data-editing-id')) {
+        const timezoneSelector = menuElement.querySelector('[data-action="open-timezone-menu"]');
+        if (timezoneSelector) {
+            timezoneSelector.classList.add('disabled-interactive');
+        }
+    }
 };
 
 export function initializeMenuForOverlay(menuName) {
