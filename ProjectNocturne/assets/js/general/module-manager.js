@@ -448,35 +448,35 @@ function performModuleDeactivation(moduleName) {
             deactivatedToggle = 'toggleControlCenter';
             resetControlCenterToDefaultMenu();
         }
-  } else if (moduleName === 'overlayContainer') {
-        const overlayContainer = domCache.overlayContainer.module;
-        if (overlayContainer) {
-            overlayContainer.classList.remove('active');
-            overlayContainer.classList.add('disabled');
-            module.active = false;
+// En module-manager.js, línea ~368
+} else if (moduleName === 'overlayContainer') {
+    const overlayContainer = domCache.overlayContainer.module;
+    if (overlayContainer) {
+        overlayContainer.classList.remove('active');
+        overlayContainer.classList.add('disabled');
+        module.active = false;
 
-            const overlayToReset = module.currentOverlay;
-            deactivatedToggle = getToggleFromOverlay(overlayToReset);
+        const overlayToReset = module.currentOverlay;
+        deactivatedToggle = getToggleFromOverlay(overlayToReset);
 
-            hideAllOverlays();
-            module.currentOverlay = null;
+        hideAllOverlays();
+        module.currentOverlay = null;
 
-            // ====== CORRECCIÓN: Solo resetear si NO estamos en modo edición ======
-            if (overlayToReset) {
-                const menuElement = document.querySelector(INDEPENDENT_OVERLAYS[overlayToReset]);
-                const isEditing = menuElement && menuElement.hasAttribute('data-editing-id');
-                
-                if (!isEditing) {
-                    resetMenuForOverlay(overlayToReset);
-                }
-                // Si está en modo edición, NO reseteamos el menú
-            }
+        // ====== VERIFICACIÓN MEJORADA ======
+        if (overlayToReset) {
+            const menuElement = document.querySelector(INDEPENDENT_OVERLAYS[overlayToReset]);
+            const isEditing = menuElement && menuElement.hasAttribute('data-editing-id');
+            
+            // SIEMPRE resetear el menú, independientemente del modo edición
+            // para limpiar spinners y otros estados temporales
+            resetMenuForOverlay(overlayToReset);
+        }
 
-            if (typeof resetOverlayNavigation === 'function') {
-                resetOverlayNavigation();
-            }
+        if (typeof resetOverlayNavigation === 'function') {
+            resetOverlayNavigation();
         }
     }
+}
 
     if (deactivatedToggle) {
         dispatchModuleEvent('moduleDeactivated', { module: deactivatedToggle });

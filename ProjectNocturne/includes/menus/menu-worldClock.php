@@ -48,7 +48,7 @@
                                             <span class="material-symbols-rounded">arrow_right</span>
                                         </div>
                                     </div>
-                                    <div class="custom-select-content disabled-interactive" data-action="open-timezone-menu">
+                                    <div class="custom-select-content" data-action="open-timezone-menu">
                                         <div class="custom-select-content-left">
                                             <span id="worldclock-selected-timezone" data-translate="select_a_timezone" data-translate-category="world_clock"></span>
                                         </div>

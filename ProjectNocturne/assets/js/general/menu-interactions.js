@@ -528,6 +528,7 @@ export function prepareCountToDateForEdit(timerData) {
             titleInput.parentElement.classList.remove('disabled-interactive');
         }
     }
+    
     menuElement.querySelector('[data-action="toggleTimerTypeDropdown"]').classList.add('disabled-interactive');
     state.timer.countTo.sound = timerData.sound;
     const targetDate = new Date(timerData.targetDate);
@@ -564,7 +565,10 @@ export function prepareWorldClockForEdit(clockData) {
     if (titleInput) titleInput.value = clockData.title;
     updateDisplay('#worldclock-selected-country', clockData.country, menuElement);
     const timezoneSelector = menuElement.querySelector('[data-action="open-timezone-menu"]');
-    if (timezoneSelector) timezoneSelector.classList.remove('disabled-interactive');
+    if (timezoneSelector) {
+        timezoneSelector.classList.remove('disabled-interactive'); // <--- ¡Esta es la línea clave!
+        console.log("dd");
+    }
     const ct = window.ct;
     const tzObject = ct.getTimezone(clockData.timezone);
     const cityName = tzObject.name.split('/').pop().replace(/_/g, ' ');
