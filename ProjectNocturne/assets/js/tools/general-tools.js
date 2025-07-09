@@ -350,6 +350,13 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
     const menuLink = document.createElement('div');
     menuLink.className = 'menu-link';
     menuLink.dataset.soundId = sound.id;
+    
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Se asigna la acción al contenedor principal del enlace ('menuLink').
+    // Esto hace que toda la fila sea clickeable para seleccionar el sonido.
+    menuLink.dataset.action = actionName; 
+    // --- FIN DE LA CORRECCIÓN ---
+
     if (sound.id === activeSoundId) {
         menuLink.classList.add('active');
     }
@@ -363,13 +370,15 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
 
     const textDiv = document.createElement('div');
     textDiv.className = 'menu-link-text';
-    textDiv.dataset.action = actionName;
+    
+    // El 'dataset.action' se ha quitado de aquí.
     textDiv.innerHTML = `<span ${translationAttrs}>${soundName}</span>`;
 
     menuLink.appendChild(iconDiv);
     menuLink.appendChild(textDiv);
 
     if (isCustom) {
+        // ... (la lógica para los botones de test y borrar en sonidos personalizados no cambia)
         const testButtonContainer = document.createElement('div');
         testButtonContainer.className = 'menu-link-icon';
         
@@ -392,6 +401,7 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
         menuLink.appendChild(testButtonContainer);
 
     } else {
+        // ... (la lógica para el botón de test en sonidos predeterminados no cambia)
         menuLink.addEventListener('mouseenter', () => {
             if (menuLink.querySelector('.menu-link-actions-container')) return;
 
@@ -404,15 +414,9 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
             
             const currentlyPlayingId = window.getCurrentlyPlayingSoundId ? window.getCurrentlyPlayingSoundId() : null;
             const isThisSoundPlaying = currentlyPlayingId === sound.id;
-            const isAnotherSoundPlaying = currentlyPlayingId !== null && !isThisSoundPlaying;
             
             const iconName = isThisSoundPlaying ? 'stop' : 'play_arrow';
             testButton.innerHTML = `<span class="material-symbols-rounded">${iconName}</span>`;
-
-            // FIX: Deshabilitar el botón si otro sonido ya está sonando
-            if (isAnotherSoundPlaying) {
-                testButton.classList.add('disabled-interactive');
-            }
             
             actionsDiv.appendChild(testButton);
             menuLink.appendChild(actionsDiv);
