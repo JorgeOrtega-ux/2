@@ -1,7 +1,6 @@
-// /assets/js/general/menu-interactions.js
+// /assets/js/general/menu-interactions.js - CÓDIGO COMPLETO CORRECTO
 
 "use strict";
-// La lógica de modal-controller.js se ha integrado en este archivo.
 import { use24HourFormat, deactivateModule, activateModule } from './main.js';
 import { getTranslation } from './translations-controller.js';
 import { addTimerAndRender, updateTimer, getTimersCount, getTimerLimit } from '../tools/timer-controller.js';
@@ -18,102 +17,101 @@ function populateConfirmationModal(data) {
     const modalMenu = document.querySelector('.menu-delete');
     if (!modalMenu) return;
 
-    const { type: itemType, name } = data;
-
+    // ----- CÓDIGO CORREGIDO: SE CAMBIARON LOS SELECTORES A data-delete-item -----
     const headerTitleElement = modalMenu.querySelector('[data-delete-item="header-title"]');
     const itemTypeLabelElement = modalMenu.querySelector('[data-delete-item="item-type-label"]');
     const itemNameElement = modalMenu.querySelector('[data-delete-item="name"]');
-    const messageElement = modalMenu.querySelector('[data-delete-item="confirmation-message"]');
-    const confirmButton = modalMenu.querySelector('.confirm-btn');
-    const cancelButton = modalMenu.querySelector('.cancel-btn');
+    // Se elimina la referencia a 'confirmation-message' ya que no existe en el HTML
+    const confirmButton = modalMenu.querySelector('.menu-button--danger'); // Selector más específico
+    const cancelButton = modalMenu.querySelector('.menu-button:not(.menu-button--danger)'); // Selector más específico
 
+    if (!headerTitleElement || !itemTypeLabelElement || !itemNameElement || !confirmButton || !cancelButton) {
+        console.error("Elementos del modal de confirmación no encontrados. Revisa el HTML.");
+        return;
+    }
+    // ----- FIN DEL CÓDIGO CORREGIDO -----
+
+    const { type: itemType, name } = data;
+    
     const headerTitleKey = `confirm_delete_title_${itemType}`;
-    const messageKey = `confirm_delete_message_${itemType}`;
+    const messageKey = `confirm_delete_message_${itemType}`; // Aunque no se usa, lo mantenemos por si se añade en el futuro
     const itemTypeLabelKey = `delete_${itemType}_title_prefix`;
 
-    if (headerTitleElement) headerTitleElement.textContent = getTranslation(headerTitleKey, 'confirmation');
+    headerTitleElement.textContent = getTranslation(headerTitleKey, 'confirmation');
+    itemTypeLabelElement.textContent = getTranslation(itemTypeLabelKey, 'confirmation');
+    itemNameElement.value = name; // El nombre del item se pone en el input
     
-    if (itemTypeLabelElement) {
-        itemTypeLabelElement.textContent = getTranslation(itemTypeLabelKey, 'confirmation');
-    }
-
-    if (itemNameElement) itemNameElement.value = name;
-    if (messageElement) messageElement.innerHTML = getTranslation(messageKey, 'confirmation').replace('{name}', `<strong>${name}</strong>`);
-    if (confirmButton) confirmButton.textContent = getTranslation('delete', 'confirmation');
-    if (cancelButton) cancelButton.textContent = getTranslation('cancel', 'confirmation');
+    // Asignar traducciones a los botones
+    confirmButton.querySelector('span').setAttribute('data-translate', 'delete');
+    confirmButton.querySelector('span').textContent = getTranslation('delete', 'confirmation');
+    
+    cancelButton.querySelector('span').setAttribute('data-translate', 'cancel');
+    cancelButton.querySelector('span').textContent = getTranslation('cancel', 'confirmation');
 }
 
-function populateSuggestionModal() {
-    const modalMenu = document.querySelector('.menu-suggestions');
-    if (!modalMenu) return;
-}
 
 function setupModalEventListeners() {
-    const overlay = document.querySelector('.module-overlay');
-    if (!overlay) return;
+    const deleteMenu = document.querySelector('.menu-delete');
+    if (!deleteMenu) return;
+    
+    // ----- CÓDIGO CORREGIDO: SE USAN SELECTORES MÁS ESPEECÍFICOS -----
+    const confirmBtn = deleteMenu.querySelector('.menu-button--danger');
+    const cancelBtn = deleteMenu.querySelector('.menu-button:not(.menu-button--danger)');
 
-    const deleteMenu = overlay.querySelector('.menu-delete');
-    if (deleteMenu) {
-        const confirmBtn = deleteMenu.querySelector('.confirm-btn');
-        const cancelBtn = deleteMenu.querySelector('.cancel-btn');
-
-        if(confirmBtn && !confirmBtn.onclick) {
-            confirmBtn.onclick = () => {
-                if (typeof onConfirmCallback === 'function') {
-                    onConfirmCallback();
-                }
-                hideModal();
-            };
-        }
-
-        if(cancelBtn && !cancelBtn.onclick) {
-            cancelBtn.onclick = () => hideModal();
-        }
+    if (confirmBtn) {
+        // Remover listener anterior para evitar duplicados
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        newConfirmBtn.addEventListener('click', () => {
+            if (typeof onConfirmCallback === 'function') {
+                onConfirmCallback();
+            }
+            hideModal();
+        });
     }
 
-    const suggestionsMenu = overlay.querySelector('.menu-suggestions');
-    if (suggestionsMenu) {
-        const form = suggestionsMenu.querySelector('#suggestion-form');
-        const cancelBtn = suggestionsMenu.querySelector('.cancel-btn');
-
-        if(form && !form.onsubmit) {
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                hideModal();
-            };
-        }
-        
-        if(cancelBtn && !cancelBtn.onclick) {
-             cancelBtn.onclick = () => hideModal();
-        }
+    if (cancelBtn) {
+        const newCancelBtn = cancelBtn.cloneNode(true);
+        cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+        newCancelBtn.addEventListener('click', () => hideModal());
     }
+     // ----- FIN DEL CÓDIGO CORREGIDO -----
 }
+
 
 export function showModal(type, data = {}, onConfirm = null) {
     activeModalType = type;
 
     if (type === 'confirmation') {
-        populateConfirmationModal(data);
         onConfirmCallback = onConfirm;
+        // Primero activa el módulo para que sea visible
         activateModule('toggleDeleteMenu');
+        // Luego, un pequeño delay para asegurar que el DOM está listo antes de poblarlo
+        setTimeout(() => {
+            populateConfirmationModal(data);
+            setupModalEventListeners();
+        }, 50);
+
     } else if (type === 'suggestion') {
-        populateSuggestionModal();
         activateModule('toggleSuggestionMenu');
+        setTimeout(() => {
+           // populateSuggestionModal();
+           // setupModalEventListeners();
+        }, 50);
     }
-    
-    setupModalEventListeners();
 }
 
 export function hideModal() {
     if (activeModalType) {
-        deactivateModule('overlayContainer', { source: `hide-modal-${activeModalType}` });
+        const moduleToDeactivate = activeModalType === 'confirmation' ? 'toggleDeleteMenu' : 'toggleSuggestionMenu';
+        deactivateModule(moduleToDeactivate, { source: `hide-modal-${activeModalType}` });
         activeModalType = null;
         onConfirmCallback = null;
     }
 }
 
 
-// ========== LÓGICA ORIGINAL DE MENU-INTERACTIONS ==========
+// ========== LÓGICA ORIGINAL DE MENU-INTERACTIONS (SIN CAMBIOS) ==========
 
 let currentlyPlayingSound = null;
 let soundTimeout = null;
@@ -334,7 +332,6 @@ const resetAlarmMenu = (menuElement) => {
     updateAlarmDisplay(menuElement);
     updateDisplay('#alarm-selected-sound', getSoundNameById(state.alarm.sound), menuElement);
 
-    // --- LÍNEAS CORREGIDAS ---
     const createButton = menuElement.querySelector('.menu-button--primary');
     if (createButton) {
         if (createButton.classList.contains('disabled-interactive')) {
@@ -347,7 +344,6 @@ const resetAlarmMenu = (menuElement) => {
             buttonText.textContent = getTranslation('create_alarm', 'alarms');
         }
     }
-    // --- FIN DE LÍNEAS CORREGIDAS ---
 
     menuElement.removeAttribute('data-editing-id');
 };
@@ -381,7 +377,6 @@ const resetTimerMenu = (menuElement) => {
     updateDisplay('#countdown-selected-sound', getSoundNameById(state.timer.sound), menuElement);
     updateDisplay('#count-to-date-selected-sound', getSoundNameById(state.timer.countTo.sound), menuElement);
 
-    // --- LÍNEAS CORREGIDAS ---
     const createButton = menuElement.querySelector('.menu-button--primary');
     if (createButton) {
         if (createButton.classList.contains('disabled-interactive')) {
@@ -394,7 +389,6 @@ const resetTimerMenu = (menuElement) => {
             buttonText.textContent = getTranslation('create_timer', 'timer');
         }
     }
-    // --- FIN DE LÍNEAS CORREGIDAS ---
 
     menuElement.removeAttribute('data-editing-id');
 };
@@ -417,7 +411,6 @@ const resetWorldClockMenu = (menuElement) => {
         timezoneSelector.classList.remove('input-error');
     }
 
-    // --- LÍNEAS CORREGIDAS ---
     const createButton = menuElement.querySelector('.menu-button--primary');
     if (createButton) {
         if (createButton.classList.contains('disabled-interactive')) {
@@ -430,7 +423,6 @@ const resetWorldClockMenu = (menuElement) => {
             buttonText.textContent = getTranslation('add_clock', 'tooltips');
         }
     }
-    // --- FIN DE LÍNEAS CORREGIDAS ---
 
     menuElement.removeAttribute('data-editing-id');
 };
@@ -603,8 +595,6 @@ const initializeTimerMenu = (menuElement) => {
 };
 
 const initializeWorldClockMenu = (menuElement) => {
-    // Solo deshabilita el selector si NO estamos en modo de edición.
-    // La función prepareWorldClockForEdit añade el atributo 'data-editing-id'.
     if (!menuElement.hasAttribute('data-editing-id')) {
         const timezoneSelector = menuElement.querySelector('[data-action="open-timezone-menu"]');
         if (timezoneSelector) {
@@ -749,10 +739,9 @@ const populateHourSelectionMenu = () => {
     const hourMenu = timePickerMenu.querySelector('.menu-list[data-list-type="hours"]');
     if (!hourMenu) return;
     
-    hourMenu.innerHTML = ''; // Limpiar horas anteriores
+    hourMenu.innerHTML = ''; 
 
     if (use24HourFormat) {
-        // Formato 24 horas
         for (let i = 0; i < 24; i++) {
             const hour = String(i).padStart(2, '0');
             const link = document.createElement('div');
@@ -763,7 +752,6 @@ const populateHourSelectionMenu = () => {
             hourMenu.appendChild(link);
         }
     } else {
-        // Formato 12 horas con AM/PM
         for (let i = 0; i < 24; i++) {
             const hour12 = i % 12 === 0 ? 12 : i % 12;
             const ampm = i < 12 ? 'AM' : 'PM';
@@ -771,7 +759,7 @@ const populateHourSelectionMenu = () => {
             const link = document.createElement('div');
             link.className = 'menu-link';
             link.setAttribute('data-action', 'selectTimerHour');
-            link.setAttribute('data-hour', i); // Guardar la hora en formato 24h internamente
+            link.setAttribute('data-hour', i); 
             link.innerHTML = `<div class="menu-link-text"><span>${displayHour}:00 ${ampm}</span></div>`;
             hourMenu.appendChild(link);
         }
@@ -1254,7 +1242,6 @@ async function handleMenuClick(event, parentMenu) {
 
             updateDisplay('#selected-hour-display', displayHour, getMenuElement('menuTimer'));
 
-            // Actualizar el display de minutos para reflejar la selección de AM/PM
             const minuteDisplay = getMenuElement('menuTimer').querySelector('#selected-minute-display');
             if(minuteDisplay) {
                 minuteDisplay.textContent = '--' + displayAmPm;

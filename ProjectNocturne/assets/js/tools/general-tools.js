@@ -1,4 +1,4 @@
-// ========== general-tools.js - CÓDIGO COMPLETO ACTUALIZADO ==========
+// ========== general-tools.js - CÓDIGO COMPLETO CORREGIDO ==========
 
 import { getTranslation } from '../general/translations-controller.js';
 import { showModal } from '../general/menu-interactions.js';
@@ -94,13 +94,10 @@ async function deleteAudioFromDB(id) {
     });
 }
 
-// **MODIFICACIÓN CLAVE**: Esta función ahora gestiona la promesa de carga.
 async function populateAudioCache() {
     if (isCachePopulated) return;
-    // Si ya hay una promesa de carga en curso, la esperamos.
     if (audioCachePromise) return audioCachePromise;
 
-    // Creamos una nueva promesa para la carga.
     audioCachePromise = (async () => {
         try {
             userAudiosCache = await getAllAudiosFromDB();
@@ -108,22 +105,18 @@ async function populateAudioCache() {
             console.log('🔊 Audio cache populated on startup.');
         } catch (error) {
             console.error('Failed to populate audio cache:', error);
-            // Asegurarnos de que no reintente infinitamente en caso de error.
             isCachePopulated = false;
         } finally {
-            audioCachePromise = null; // Limpiamos la promesa una vez resuelta.
+            audioCachePromise = null;
         }
     })();
 
     return audioCachePromise;
 }
 
-// **NUEVA FUNCIÓN EXPORTADA**: Para iniciar la precarga desde init-app.js
 export function startAudioCachePreload() {
-    // No necesitamos `await` aquí, solo queremos que empiece.
     populateAudioCache();
 }
-
 
 async function saveUserAudio(name, fileBlob) {
     const newAudio = {
@@ -289,9 +282,7 @@ export function stopSound() {
     isPlayingSound = false;
 }
 
-// **MODIFICACIÓN CLAVE**: La función ahora es asíncrona y espera la carga de la caché.
 export async function generateSoundList(uploadElement, listElement, actionName, activeSoundId = null) {
-    // Esperamos a que la caché esté poblada.
     await populateAudioCache();
 
     if (!uploadElement || !listElement) {
@@ -350,12 +341,7 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
     const menuLink = document.createElement('div');
     menuLink.className = 'menu-link';
     menuLink.dataset.soundId = sound.id;
-
-    // --- INICIO DE LA CORRECCIÓN ---
-    // Se asigna la acción al contenedor principal del enlace ('menuLink').
-    // Esto hace que toda la fila sea clickeable para seleccionar el sonido.
     menuLink.dataset.action = actionName;
-    // --- FIN DE LA CORRECCIÓN ---
 
     if (sound.id === activeSoundId) {
         menuLink.classList.add('active');
@@ -370,15 +356,12 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
 
     const textDiv = document.createElement('div');
     textDiv.className = 'menu-link-text';
-
-    // El 'dataset.action' se ha quitado de aquí.
     textDiv.innerHTML = `<span ${translationAttrs}>${soundName}</span>`;
 
     menuLink.appendChild(iconDiv);
     menuLink.appendChild(textDiv);
 
     if (isCustom) {
-        // ... (la lógica para los botones de test y borrar en sonidos personalizados no cambia)
         const testButtonContainer = document.createElement('div');
         testButtonContainer.className = 'menu-link-icon';
 
@@ -401,7 +384,6 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
         menuLink.appendChild(testButtonContainer);
 
     } else {
-        // ... (la lógica para el botón de test en sonidos predeterminados no cambia)
         menuLink.addEventListener('mouseenter', () => {
             if (menuLink.querySelector('.menu-link-actions-container')) return;
 

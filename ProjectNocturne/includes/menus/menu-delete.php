@@ -27,7 +27,7 @@
                         </div>
                         <div class="menu-content-general">
                             <div class="enter-text-tool disabled-interactive">
-                                <input type="text" data-delete-item="name">
+                                <input type="text" data-delete-item="name" disabled>
                             </div>
                         </div>
                     </div>               
@@ -36,8 +36,12 @@
         </div>
         <div class="menu-section-bottom">
             <div class="menu-button-group">
-                <button class="menu-button" data-translate="cancel" data-translate-category="confirmation"></button>
-                <button class="menu-button menu-button--danger" data-translate="delete" data-translate-category="confirmation"></button>
+                <button class="menu-button cancel-btn" data-action="cancel-delete">
+                    <span data-translate="cancel" data-translate-category="confirmation"></span>
+                </button>
+                <button class="menu-button menu-button--danger confirm-btn" data-action="confirm-delete">
+                    <span data-translate="delete" data-translate-category="confirmation"></span>
+                </button>
             </div>
         </div>
     </div>
