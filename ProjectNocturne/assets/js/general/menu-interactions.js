@@ -404,6 +404,8 @@ const resetWorldClockMenu = (menuElement) => {
     const titleInput = menuElement.querySelector('#worldclock-title');
     if (titleInput) {
         titleInput.value = '';
+        titleInput.parentElement.classList.add('disabled-interactive');
+        titleInput.setAttribute('disabled', 'true');
         titleInput.parentElement.classList.remove('input-error');
     }
     updateDisplay('#worldclock-selected-country', getTranslation('select_a_country', 'world_clock'), menuElement);
@@ -562,7 +564,11 @@ export function prepareWorldClockForEdit(clockData) {
     state.worldClock.timezone = clockData.timezone;
     state.worldClock.countryCode = clockData.countryCode;
     const titleInput = menuElement.querySelector('#worldclock-title');
-    if (titleInput) titleInput.value = clockData.title;
+    if (titleInput) {
+        titleInput.value = clockData.title;
+        titleInput.removeAttribute('disabled');
+        titleInput.parentElement.classList.remove('disabled-interactive');
+    }
     updateDisplay('#worldclock-selected-country', clockData.country, menuElement);
     const timezoneSelector = menuElement.querySelector('[data-action="open-timezone-menu"]');
     if (timezoneSelector) {
@@ -1174,8 +1180,8 @@ async function handleMenuClick(event, parentMenu) {
             break;
         case 'selectCountry':
             event.stopPropagation();
-            const countryCode = target.getAttribute('data-country-code');
-            state.worldClock.country = target.querySelector('.menu-link-text span')?.textContent;
+            const countryCode = target.closest('.menu-link').getAttribute('data-country-code');
+            state.worldClock.country = target.closest('.menu-link').querySelector('.menu-link-text span')?.textContent;
             state.worldClock.countryCode = countryCode;
             const worldClockMenu = getMenuElement('menuWorldClock');
             updateDisplay('#worldclock-selected-country', state.worldClock.country, worldClockMenu);
@@ -1183,12 +1189,20 @@ async function handleMenuClick(event, parentMenu) {
             timezoneSelector.classList.remove('disabled-interactive');
             updateDisplay('#worldclock-selected-timezone', getTranslation('select_a_timezone', 'world_clock'), worldClockMenu);
             state.worldClock.timezone = '';
+            
+            const titleInput = worldClockMenu.querySelector('#worldclock-title');
+            if (titleInput) {
+                titleInput.value = state.worldClock.country;
+                titleInput.removeAttribute('disabled');
+                titleInput.parentElement.classList.remove('disabled-interactive');
+            }
+
             navigateBack();
             break;
         case 'selectTimezone':
             event.stopPropagation();
-            state.worldClock.timezone = target.getAttribute('data-timezone');
-            const tzDisplayName = target.querySelector('.menu-link-text span')?.textContent;
+            state.worldClock.timezone = target.closest('.menu-link').getAttribute('data-timezone');
+            const tzDisplayName = target.closest('.menu-link').querySelector('.menu-link-text span')?.textContent;
             updateDisplay('#worldclock-selected-timezone', tzDisplayName, getMenuElement('menuWorldClock'));
             navigateBack();
             break;

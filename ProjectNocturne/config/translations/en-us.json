@@ -256,7 +256,7 @@
     "default_audios": "Default Audios",
     "audio_singular": "Audio"
   },
-  "timer": {
+ "timer": {
     "h": "h",
     "min": "min",
     "s": "s",
@@ -273,6 +273,10 @@
     "select_date_time": "Select Date & Time",
     "create_timer": "Create timer",
     "save_changes": "Save Changes",
+    "rang_ago": "Rang {time} ago",
+    "years": "years",
+    "months": "months",
+    "days": "days",
     "hours": "Hours",
     "minutes": "Minutes",
     "seconds": "Seconds",
