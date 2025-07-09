@@ -26,7 +26,7 @@
             <div class="sidebar-legal-options disabled">
                 <div class="sidebar-item">
                     <div class="sidebar-button" data-action="back-to-tools" data-translate="back" data-translate-category="general" data-translate-target="tooltip">
-                        <span class="material-symbols-rounded">arrow_back</span>
+                        <span class="material-symbols-rounded">home</span>
                     </div>
                     <span class="separator"></span>
                     <div class="sidebar-button" data-section-name="privacy-policy" data-translate="privacy_policy" data-translate-category="menu" data-translate-target="tooltip">
