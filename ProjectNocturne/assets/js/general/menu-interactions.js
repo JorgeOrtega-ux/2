@@ -95,7 +95,7 @@ export function showModal(type, data = {}, onConfirm = null) {
     if (type === 'confirmation') {
         populateConfirmationModal(data);
         onConfirmCallback = onConfirm;
-        activateModule('toggleDeleteMenu'); 
+        activateModule('toggleDeleteMenu');
     } else if (type === 'suggestion') {
         populateSuggestionModal();
         activateModule('toggleSuggestionMenu');
@@ -333,7 +333,7 @@ const resetAlarmMenu = (menuElement) => {
     }
     updateAlarmDisplay(menuElement);
     updateDisplay('#alarm-selected-sound', getSoundNameById(state.alarm.sound), menuElement);
-    
+
     // --- LÍNEAS CORREGIDAS ---
     const createButton = menuElement.querySelector('.menu-button--primary');
     if (createButton) {
@@ -380,7 +380,7 @@ const resetTimerMenu = (menuElement) => {
     updateDisplay('#selected-minute-display', '--', menuElement);
     updateDisplay('#countdown-selected-sound', getSoundNameById(state.timer.sound), menuElement);
     updateDisplay('#count-to-date-selected-sound', getSoundNameById(state.timer.countTo.sound), menuElement);
-    
+
     // --- LÍNEAS CORREGIDAS ---
     const createButton = menuElement.querySelector('.menu-button--primary');
     if (createButton) {
@@ -416,7 +416,7 @@ const resetWorldClockMenu = (menuElement) => {
         timezoneSelector.classList.add('disabled-interactive');
         timezoneSelector.classList.remove('input-error');
     }
-    
+
     // --- LÍNEAS CORREGIDAS ---
     const createButton = menuElement.querySelector('.menu-button--primary');
     if (createButton) {
@@ -530,7 +530,7 @@ export function prepareCountToDateForEdit(timerData) {
             titleInput.parentElement.classList.remove('disabled-interactive');
         }
     }
-    
+
     menuElement.querySelector('[data-action="toggleTimerTypeDropdown"]').classList.add('disabled-interactive');
     state.timer.countTo.sound = timerData.sound;
     const targetDate = new Date(timerData.targetDate);
@@ -747,14 +747,34 @@ const populateHourSelectionMenu = () => {
     const timePickerMenu = getMenuElement('timePicker');
     if (!timePickerMenu) return;
     const hourMenu = timePickerMenu.querySelector('.menu-list[data-list-type="hours"]');
-    if (!hourMenu || hourMenu.children.length > 0) return;
-    hourMenu.innerHTML = '';
-    for (let i = 0; i < 24; i++) {
-        const hour = String(i).padStart(2, '0');
-        const link = document.createElement('div');
-        link.className = 'menu-link'; link.setAttribute('data-action', 'selectTimerHour'); link.setAttribute('data-hour', i);
-        link.innerHTML = `<div class="menu-link-text"><span>${hour}:00</span></div>`;
-        hourMenu.appendChild(link);
+    if (!hourMenu) return;
+    
+    hourMenu.innerHTML = ''; // Limpiar horas anteriores
+
+    if (use24HourFormat) {
+        // Formato 24 horas
+        for (let i = 0; i < 24; i++) {
+            const hour = String(i).padStart(2, '0');
+            const link = document.createElement('div');
+            link.className = 'menu-link';
+            link.setAttribute('data-action', 'selectTimerHour');
+            link.setAttribute('data-hour', i);
+            link.innerHTML = `<div class="menu-link-text"><span>${hour}:00</span></div>`;
+            hourMenu.appendChild(link);
+        }
+    } else {
+        // Formato 12 horas con AM/PM
+        for (let i = 0; i < 24; i++) {
+            const hour12 = i % 12 === 0 ? 12 : i % 12;
+            const ampm = i < 12 ? 'AM' : 'PM';
+            const displayHour = String(hour12);
+            const link = document.createElement('div');
+            link.className = 'menu-link';
+            link.setAttribute('data-action', 'selectTimerHour');
+            link.setAttribute('data-hour', i); // Guardar la hora en formato 24h internamente
+            link.innerHTML = `<div class="menu-link-text"><span>${displayHour}:00 ${ampm}</span></div>`;
+            hourMenu.appendChild(link);
+        }
     }
 };
 
@@ -765,11 +785,22 @@ const populateMinuteSelectionMenu = (hour) => {
     if (!minuteMenu) return;
     minuteMenu.innerHTML = '';
     for (let j = 0; j < 60; j += 5) {
-        const hourStr = String(hour).padStart(2, '0');
+        let displayHour;
+        let displayAmPm = '';
+        if (use24HourFormat) {
+            displayHour = String(hour).padStart(2, '0');
+        } else {
+            const h12 = hour % 12 === 0 ? 12 : hour % 12;
+            displayHour = String(h12);
+            displayAmPm = hour < 12 ? ' AM' : ' PM';
+        }
         const minuteStr = String(j).padStart(2, '0');
         const link = document.createElement('div');
-        link.className = 'menu-link'; link.setAttribute('data-action', 'selectTimerMinute'); link.setAttribute('data-hour', hour); link.setAttribute('data-minute', j);
-        link.innerHTML = `<div class="menu-link-text"><span>${hourStr}:${minuteStr}</span></div>`;
+        link.className = 'menu-link';
+        link.setAttribute('data-action', 'selectTimerMinute');
+        link.setAttribute('data-hour', hour);
+        link.setAttribute('data-minute', j);
+        link.innerHTML = `<div class="menu-link-text"><span>${displayHour}:${minuteStr}${displayAmPm}</span></div>`;
         minuteMenu.appendChild(link);
     }
 };
@@ -1011,7 +1042,7 @@ async function handleMenuClick(event, parentMenu) {
 
     const target = event.target.closest('[data-action]');
     if (!target) return;
-    
+
     const action = target.dataset.action;
 
     if (action === 'open-suggestion-types-menu') {
@@ -1189,7 +1220,7 @@ async function handleMenuClick(event, parentMenu) {
             timezoneSelector.classList.remove('disabled-interactive');
             updateDisplay('#worldclock-selected-timezone', getTranslation('select_a_timezone', 'world_clock'), worldClockMenu);
             state.worldClock.timezone = '';
-            
+
             const titleInput = worldClockMenu.querySelector('#worldclock-title');
             if (titleInput) {
                 titleInput.value = state.worldClock.country;
@@ -1206,13 +1237,29 @@ async function handleMenuClick(event, parentMenu) {
             updateDisplay('#worldclock-selected-timezone', tzDisplayName, getMenuElement('menuWorldClock'));
             navigateBack();
             break;
-        case 'selectTimerHour':
+        case 'selectTimerHour': {
             event.stopPropagation();
             const hour = parseInt(target.dataset.hour, 10);
             state.timer.countTo.selectedHour = hour;
-            const timerMenu = getMenuElement('menuTimer');
-            updateDisplay('#selected-hour-display', String(hour).padStart(2, '0'), timerMenu);
-            updateDisplay('#selected-minute-display', '--', timerMenu);
+
+            let displayHour;
+            let displayAmPm = '';
+            if (use24HourFormat) {
+                displayHour = String(hour).padStart(2, '0');
+            } else {
+                const h12 = hour % 12 === 0 ? 12 : hour % 12;
+                displayHour = String(h12);
+                displayAmPm = hour < 12 ? ' AM' : ' PM';
+            }
+
+            updateDisplay('#selected-hour-display', displayHour, getMenuElement('menuTimer'));
+
+            // Actualizar el display de minutos para reflejar la selección de AM/PM
+            const minuteDisplay = getMenuElement('menuTimer').querySelector('#selected-minute-display');
+            if(minuteDisplay) {
+                minuteDisplay.textContent = '--' + displayAmPm;
+            }
+
             const hourList = parentMenu.querySelector('[data-list-type="hours"]');
             const minuteList = parentMenu.querySelector('[data-list-type="minutes"]');
             if (hourList && minuteList) {
@@ -1223,13 +1270,26 @@ async function handleMenuClick(event, parentMenu) {
                 populateMinuteSelectionMenu(hour);
             }
             break;
-        case 'selectTimerMinute':
+        }
+
+        case 'selectTimerMinute': {
             event.stopPropagation();
             const minute = parseInt(target.dataset.minute, 10);
             state.timer.countTo.selectedMinute = minute;
-            updateDisplay('#selected-minute-display', String(minute).padStart(2, '0'), getMenuElement('menuTimer'));
+
+            let displayAmPm = '';
+            if (!use24HourFormat) {
+                displayAmPm = state.timer.countTo.selectedHour < 12 ? ' AM' : ' PM';
+            }
+
+            const minuteDisplay = getMenuElement('menuTimer').querySelector('#selected-minute-display');
+            if (minuteDisplay) {
+                minuteDisplay.textContent = String(minute).padStart(2, '0') + displayAmPm;
+            }
+
             navigateBack();
             break;
+        }
         case 'previewAlarmSound': stopSound(); playSound(state.alarm.sound); setTimeout(stopSound, 2000); break;
         case 'previewCountdownSound': stopSound(); playSound(state.timer.sound); setTimeout(stopSound, 2000); break;
         case 'previewCountToDateSound': stopSound(); playSound(state.timer.countTo.sound); setTimeout(stopSound, 2000); break;
@@ -1304,7 +1364,7 @@ async function handleMenuClick(event, parentMenu) {
 
             const alarmTitleInput = parentMenu.querySelector('#alarm-title');
             if (!validateField(alarmTitleInput.parentElement, alarmTitleInput.value.trim())) return;
-            
+
             addSpinnerToCreateButton(target);
             setTimeout(() => {
                 window.alarmManager?.updateAlarm(editingId, {
@@ -1323,9 +1383,9 @@ async function handleMenuClick(event, parentMenu) {
 
             const timerTitleInput = parentMenu.querySelector('#timer-title');
             const { hours, minutes, seconds } = state.timer.duration;
-            
+
             if (!validateField(timerTitleInput.parentElement, timerTitleInput.value.trim()) || (hours === 0 && minutes === 0 && seconds === 0)) return;
-            
+
             addSpinnerToCreateButton(target);
             setTimeout(() => {
                 updateTimer(editingId, {
@@ -1345,7 +1405,7 @@ async function handleMenuClick(event, parentMenu) {
             const { selectedDate, selectedHour, selectedMinute } = state.timer.countTo;
 
             if (!validateField(eventTitleInput.parentElement, eventTitleInput.value.trim()) || !selectedDate || typeof selectedHour !== 'number' || typeof selectedMinute !== 'number') return;
-            
+
             addSpinnerToCreateButton(target);
             setTimeout(() => {
                 const targetDate = new Date(selectedDate);
@@ -1362,7 +1422,7 @@ async function handleMenuClick(event, parentMenu) {
         case 'saveWorldClockChanges': {
             const editingId = parentMenu.getAttribute('data-editing-id');
             if (!editingId) return;
-            
+
             const clockTitleInput = parentMenu.querySelector('#worldclock-title');
             const { country, timezone } = state.worldClock;
 
@@ -1385,3 +1445,5 @@ window.getCurrentlyPlayingSoundId = () => currentlyPlayingSound ? currentlyPlayi
 export function initMenuInteractions() {
     setupGlobalEventListeners();
 }
+
+export { populateHourSelectionMenu };

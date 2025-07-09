@@ -1,8 +1,9 @@
-// ========== MAIN.JS - UPDATED FOR NEW MODULE MANAGER FUNCTIONS ==========
+// /assets/js/general/main.js
 
 import { activateModule, deactivateAllModules, deactivateModule, getActiveModule, isAnyModuleActive, isModuleActive, isModuleCurrentlyChanging, logModuleStates, resetModuleChangeFlag, showControlCenterMenu, showSpecificOverlay, toggleModule } from './module-manager.js';
 import { initializeTextStyleManager } from '../tools/general-tools.js';
 import { isGradientColor } from '../components/palette-colors.js';
+import { populateHourSelectionMenu } from './menu-interactions.js';
 
 // ========== GLOBAL TIME FORMAT SETTING ==========
 export let use24HourFormat = true;
@@ -223,7 +224,7 @@ function initSectionManagement() {
             const action = button.dataset.action;
             const sectionName = button.dataset.sectionName;
             if (action === 'back-to-tools') {
-                switchToToolsView(true); 
+                switchToToolsView(true);
             } else if (sectionName) {
                 activateSection(sectionName);
             }
@@ -256,6 +257,12 @@ function switchToSection(sectionName) {
 export function toggleTimeFormat() {
     use24HourFormat = !use24HourFormat;
     updateTimeFormatInAllSections();
+
+    // Vuelve a poblar el selector de horas si el menú está abierto
+    const timePickerMenu = document.querySelector('.menu-timePicker[data-menu="timePicker"]');
+    if (timePickerMenu && timePickerMenu.classList.contains('active')) {
+        populateHourSelectionMenu();
+    }
 }
 
 function updateTimeFormatInAllSections() {
@@ -372,14 +379,14 @@ function getCurrentActiveOverlay() {
         const activeOverlay = overlayContainer.querySelector('.menu-alarm.active, .menu-timer.active, .menu-worldClock.active, .menu-paletteColors.active');
         if (activeOverlay) {
             const dataMenu = activeOverlay.getAttribute('data-menu');
-            
+
             const overlayMap = {
                 'alarm': 'menuAlarm',
                 'timer': 'menuTimer',
                 'worldClock': 'menuWorldClock',
                 'paletteColors': 'menuPaletteColors'
             };
-            
+
             return overlayMap[dataMenu] || null;
         }
     }
