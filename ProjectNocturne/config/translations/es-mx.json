@@ -4,7 +4,8 @@
     "created": "creada",
     "updated": "actualizada",
     "deleted": "eliminada",
-    "ringing": "sonando"
+    "ringing": "sonando",
+    "back": "Volver a inicio"
   },
   "notifications": {
     "alarm_ringing_title": "Alarma sonando",

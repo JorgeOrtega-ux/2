@@ -4,7 +4,8 @@
     "created": "créé(e)",
     "updated": "mis(e) à jour",
     "deleted": "supprimé(e)",
-    "ringing": "sonne"
+    "ringing": "sonne",
+    "back": "Retour à l'accueil"
   },
   "notifications": {
     "alarm_ringing_title": "Alarme sonne",

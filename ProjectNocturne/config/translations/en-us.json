@@ -4,7 +4,8 @@
     "created": "created",
     "updated": "updated",
     "deleted": "deleted",
-    "ringing": "ringing"
+    "ringing": "ringing",
+    "back": "Back to Home"
   },
   "notifications": {
     "alarm_ringing_title": "Alarm Ringing",

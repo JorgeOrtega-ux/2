@@ -1,4 +1,4 @@
-<div class="section-timer disabled">
+<div class="section-timer disabled" data-section="timer">
     <div class="section-top">
         <div class="tool-options-wrapper">
             <div class="tool-options-content body-title">

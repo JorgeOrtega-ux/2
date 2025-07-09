@@ -1,4 +1,4 @@
-<div class="section-worldClock disabled">
+<div class="section-worldClock disabled" data-section="worldClock">
     <div class="section-top">
         <div class="tool-options-wrapper">
             <div class="tool-options-content body-title">

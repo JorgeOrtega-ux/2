@@ -350,11 +350,11 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
     const menuLink = document.createElement('div');
     menuLink.className = 'menu-link';
     menuLink.dataset.soundId = sound.id;
-    
+
     // --- INICIO DE LA CORRECCIÓN ---
     // Se asigna la acción al contenedor principal del enlace ('menuLink').
     // Esto hace que toda la fila sea clickeable para seleccionar el sonido.
-    menuLink.dataset.action = actionName; 
+    menuLink.dataset.action = actionName;
     // --- FIN DE LA CORRECCIÓN ---
 
     if (sound.id === activeSoundId) {
@@ -370,7 +370,7 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
 
     const textDiv = document.createElement('div');
     textDiv.className = 'menu-link-text';
-    
+
     // El 'dataset.action' se ha quitado de aquí.
     textDiv.innerHTML = `<span ${translationAttrs}>${soundName}</span>`;
 
@@ -381,7 +381,7 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
         // ... (la lógica para los botones de test y borrar en sonidos personalizados no cambia)
         const testButtonContainer = document.createElement('div');
         testButtonContainer.className = 'menu-link-icon';
-        
+
         const testButton = document.createElement('div');
         testButton.className = 'interactive-icon sound-test-btn';
         testButton.dataset.action = 'test-sound';
@@ -411,13 +411,13 @@ function createSoundMenuItem(sound, actionName, activeSoundId, isCustom) {
             const testButton = document.createElement('div');
             testButton.className = 'interactive-icon sound-test-btn';
             testButton.dataset.action = 'test-sound';
-            
+
             const currentlyPlayingId = window.getCurrentlyPlayingSoundId ? window.getCurrentlyPlayingSoundId() : null;
             const isThisSoundPlaying = currentlyPlayingId === sound.id;
-            
+
             const iconName = isThisSoundPlaying ? 'stop' : 'play_arrow';
             testButton.innerHTML = `<span class="material-symbols-rounded">${iconName}</span>`;
-            
+
             actionsDiv.appendChild(testButton);
             menuLink.appendChild(actionsDiv);
         });
@@ -693,7 +693,7 @@ export function initializeCentralizedFontManager() {
     }
     function findFontElements() {
         sections.forEach(function processSectionElements(sectionName) {
-            const section = document.querySelector(`.section-${sectionName}`);
+            const section = document.querySelector(`[data-section="${sectionName}"]`); // <--- CAMBIO AQUÍ
             if (!section) return;
             const clockContainer = section.querySelector('.tool-content');
             const clockElement = section.querySelector(`.tool-${sectionName} span`);

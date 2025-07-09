@@ -130,14 +130,14 @@ function activateSection(sectionName, showLog = true) {
     }
 
     // Ocultar la sección anterior en el DOM
-    const oldSection = document.querySelector(`.section-content > .active`);
+    const oldSection = document.querySelector('.section-content > .active');
     if (oldSection) {
         oldSection.classList.remove('active');
         oldSection.classList.add('disabled');
     }
 
     // Mostrar la nueva sección en el DOM
-    const newSection = document.querySelector(`.section-content > .section-${sectionName}, .section-content > [data-section="${sectionName}"]`);
+    const newSection = document.querySelector(`.section-content > [data-section="${sectionName}"]`);
     if (newSection) {
         newSection.classList.remove('disabled');
         newSection.classList.add('active');
@@ -158,6 +158,7 @@ function activateSection(sectionName, showLog = true) {
 }
 
 
+
 function updateSidebarButtons(activeSection) {
     document.querySelectorAll('.sidebar-button').forEach(button => {
         const sectionName = button.dataset.sectionName;
@@ -171,26 +172,33 @@ function updateSidebarButtons(activeSection) {
 
 function switchToLegalView(sectionName) {
     sectionStates.currentView = 'legal';
-    document.querySelectorAll('.section-everything, .section-alarm, .section-timer, .section-stopwatch, .section-worldClock').forEach(s => s.classList.add('disabled'));
-    document.querySelectorAll('.sidebar-top').forEach(s => s.classList.add('disabled'));
-    document.querySelectorAll('.sidebar-legal-options').forEach(s => s.classList.remove('disabled'));
+
+    // Ocultar el div de herramientas y mostrar el de legales
+    document.querySelector('.sidebar-tools')?.classList.add('disabled');
+    document.querySelector('.sidebar-legal-options')?.classList.remove('disabled');
+
+    // Activar la sección legal correspondiente
     activateSection(sectionName);
 }
 
-function switchToToolsView(showLog = false) { // <--- Se añade el parámetro
+function switchToToolsView(showLog = false) {
     sectionStates.currentView = 'tools';
-    document.querySelectorAll('.section-legal-content').forEach(s => s.classList.add('disabled'));
-    document.querySelectorAll('.sidebar-legal-options').forEach(s => s.classList.add('disabled'));
-    document.querySelectorAll('.sidebar-top').forEach(s => s.classList.remove('disabled'));
-    activateSection('everything', showLog); // <--- Se pasa el parámetro
+
+    // Ocultar el div de legales y mostrar el de herramientas
+    document.querySelector('.sidebar-legal-options')?.classList.add('disabled');
+    document.querySelector('.sidebar-tools')?.classList.remove('disabled');
+
+    // Activar la sección "everything" por defecto
+    activateSection('everything', showLog);
 }
 
 function initSectionManagement() {
-    // Event listeners para los botones de herramientas
-    document.querySelectorAll('.sidebar-top .sidebar-button').forEach(button => {
+    // Event listener para los botones de herramientas (selector corregido)
+    document.querySelectorAll('.sidebar-tools .sidebar-button').forEach(button => {
         button.addEventListener('click', () => {
             const sectionName = button.dataset.sectionName;
             if (sectionName) {
+                // Esta lógica ahora solo se aplica a los botones de herramientas
                 if (sectionStates.currentView !== 'tools') {
                     switchToToolsView();
                 }
@@ -199,7 +207,7 @@ function initSectionManagement() {
         });
     });
 
-    // Event listeners para los links de políticas en el Control Center
+    // Event listener para los links de políticas en el Control Center (sin cambios)
     document.querySelector('.module-control-center').addEventListener('click', (e) => {
         const legalLink = e.target.closest('[data-action="privacy-policy"], [data-action="terms-conditions"], [data-action="cookies-policy"]');
         if (legalLink) {
@@ -209,13 +217,13 @@ function initSectionManagement() {
         }
     });
 
-    // Event listeners para los botones en la barra lateral de políticas
+    // Event listener para los botones en la barra lateral de políticas (sin cambios)
     document.querySelectorAll('.sidebar-legal-options .sidebar-button').forEach(button => {
         button.addEventListener('click', () => {
             const action = button.dataset.action;
             const sectionName = button.dataset.sectionName;
             if (action === 'back-to-tools') {
-                switchToToolsView(true); // <--- Se llama con 'true' para mostrar el log
+                switchToToolsView(true); 
             } else if (sectionName) {
                 activateSection(sectionName);
             }

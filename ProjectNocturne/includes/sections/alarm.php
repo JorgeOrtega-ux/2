@@ -1,4 +1,4 @@
-<div class="section-alarm disabled">
+<div class="section-alarm disabled" data-section="alarm">
     <div class="section-top">
         <div class="tool-options-wrapper">
             <div class="tool-options-content body-title">

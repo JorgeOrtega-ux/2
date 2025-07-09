@@ -1,4 +1,4 @@
-<div class="section-stopwatch disabled">
+<div class="section-stopwatch disabled" data-section="stopwatch">
     <div class="section-top">
         <div class="tool-options-wrapper">
             <div class="tool-options-content body-title">
