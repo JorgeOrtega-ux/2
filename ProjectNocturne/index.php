@@ -43,6 +43,19 @@
                                 <?php include 'includes/sections/timer.php'; ?>
                                 <?php include 'includes/sections/stopwatch.php'; ?>
                                 <?php include 'includes/sections/worldClock.php'; ?>
+
+                                <div class="section-legal-content disabled" data-section="privacy-policy">
+                                    <h1>Política de Privacidad</h1>
+                                    <p>Este es el contenido de tu política de privacidad. Puedes reemplazarlo con tu texto real.</p>
+                                </div>
+                                <div class="section-legal-content disabled" data-section="terms-conditions">
+                                    <h1>Términos y Condiciones</h1>
+                                    <p>Este es el contenido de tus términos y condiciones. Puedes reemplazarlo con tu texto real.</p>
+                                </div>
+                                <div class="section-legal-content disabled" data-section="cookies-policy">
+                                    <h1>Política de Cookies</h1>
+                                    <p>Este es el contenido de tu política de cookies. Puedes reemplazarlo con tu texto real.</p>
+                                </div>
                             </div>
                         </div>
                     </div>

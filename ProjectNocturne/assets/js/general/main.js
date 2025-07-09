@@ -22,7 +22,6 @@ function initSidebarMobile() {
     }
 
     function handleSidebarToggle(e) {
-        // Detener la propagación para evitar que el listener global lo cierre inmediatamente
         if (e) e.stopPropagation();
 
         if (btn.hasAttribute('disabled')) {
@@ -42,21 +41,17 @@ function initSidebarMobile() {
 
     btn.addEventListener('click', handleSidebarToggle);
 
-    // --- NUEVA LÓGICA ---
-    // Cierra el sidebar si se hace clic fuera de él
     document.addEventListener('click', (e) => {
         if (sidebar.classList.contains('active') && !sidebar.contains(e.target) && !btn.contains(e.target)) {
             handleSidebarToggle();
         }
     });
 
-    // Cierra el sidebar cuando se selecciona una nueva sección
     document.addEventListener('sectionChanged', () => {
         if (sidebar.classList.contains('active')) {
             handleSidebarToggle();
         }
     });
-    // --- FIN DE LA NUEVA LÓGICA ---
 
     function updateSidebarVisibility() {
         const screenWidth = window.innerWidth;
@@ -74,155 +69,113 @@ function initSidebarMobile() {
     window.addEventListener('resize', updateSidebarVisibility);
 }
 
-// ========== SIDEBAR SECTIONS SYSTEM ==========
+// ========== SIDEBAR & LEGAL SECTIONS SYSTEM ==========
 
-const activeSectionStates = {
-    everything: true,
-    alarm: false,
-    stopwatch: false,
-    timer: false,
-    worldClock: false
+const sectionStates = {
+    currentView: 'tools', // Puede ser 'tools' o 'legal'
+    activeSection: 'everything'
 };
 
-const iconToSection = {
-    'home': 'everything',
-    'alarm': 'alarm',
-    'timelapse': 'stopwatch',
-    'timer': 'timer',
-    'schedule': 'worldClock'
-};
+function activateSection(sectionName) {
+    if (sectionStates.activeSection === sectionName) return;
 
-function logSectionStates() {
-    console.groupCollapsed('📋 Current Section States');
-    const statesForTable = {};
-    const sections = Object.keys(activeSectionStates);
-    for (let i = 0; i < sections.length; i++) {
-        const section = sections[i];
-        statesForTable[section.toUpperCase()] = {
-            Status: activeSectionStates[section] ? '✅ ACTIVE' : '❌ INACTIVE'
-        };
-    }
-    console.table(statesForTable);
-    console.groupEnd();
-}
-
-function activateSection(sectionName, showLog) {
-    if (activeSectionStates[sectionName] === true) {
-        return;
-    }
-    if (showLog === undefined) showLog = true;
-
-    const sections = Object.keys(activeSectionStates);
-    for (let i = 0; i < sections.length; i++) {
-        activeSectionStates[sections[i]] = false;
+    // Ocultar la sección anterior
+    const oldSection = document.querySelector(`.section-content > .active`);
+    if (oldSection) {
+        oldSection.classList.remove('active');
+        oldSection.classList.add('disabled');
     }
 
-    if (activeSectionStates.hasOwnProperty(sectionName)) {
-        activeSectionStates[sectionName] = true;
-
-        updateSidebarButtons(sectionName);
-        updateSectionContent(sectionName);
-
-        if (showLog) {
-            logSectionStates();
-        }
-
-        const event = new CustomEvent('sectionChanged', {
-            detail: { activeSection: sectionName, states: activeSectionStates }
-        });
-        document.dispatchEvent(event);
+    // Mostrar la nueva sección
+    const newSection = document.querySelector(`.section-content > .section-${sectionName}, .section-content > [data-section="${sectionName}"]`);
+    if (newSection) {
+        newSection.classList.remove('disabled');
+        newSection.classList.add('active');
+        sectionStates.activeSection = sectionName;
+    } else {
+        console.warn(`Sección "${sectionName}" no encontrada.`);
     }
+
+    updateSidebarButtons(sectionName);
+
+    const event = new CustomEvent('sectionChanged', {
+        detail: { activeSection: sectionName, view: sectionStates.currentView }
+    });
+    document.dispatchEvent(event);
 }
 
 function updateSidebarButtons(activeSection) {
-    const allSidebarButtons = document.querySelectorAll('.sidebar-button');
-
-    for (let i = 0; i < allSidebarButtons.length; i++) {
-        const button = allSidebarButtons[i];
-        const icon = button.querySelector('.material-symbols-rounded');
-        if (icon) {
-            const iconName = icon.textContent.trim();
-            const sectionName = iconToSection[iconName];
-
-            if (sectionName === activeSection) {
-                button.classList.add('active');
-            } else {
-                button.classList.remove('active');
-            }
+    document.querySelectorAll('.sidebar-button').forEach(button => {
+        if (button.dataset.sectionName === activeSection) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
         }
-    }
+    });
 }
 
-function updateSectionContent(activeSection) {
-    const allSections = document.querySelectorAll('.section-content > div[class*="section-"]');
-    for (let i = 0; i < allSections.length; i++) {
-        const section = allSections[i];
-        section.classList.remove('active');
-        section.classList.add('disabled');
-    }
-
-    const targetSection = document.querySelector('.section-' + activeSection);
-    if (targetSection) {
-        targetSection.classList.remove('disabled');
-        targetSection.classList.add('active');
-    }
+function switchToLegalView(sectionName) {
+    sectionStates.currentView = 'legal';
+    document.querySelectorAll('.section-everything, .section-alarm, .section-timer, .section-stopwatch, .section-worldClock').forEach(s => s.classList.add('disabled'));
+    document.querySelectorAll('.sidebar-top').forEach(s => s.classList.add('disabled'));
+    document.querySelectorAll('.sidebar-legal-options').forEach(s => s.classList.remove('disabled'));
+    activateSection(sectionName);
 }
 
-function initSidebarSections() {
-    const sidebarButtons = document.querySelectorAll('.sidebar-button');
+function switchToToolsView() {
+    sectionStates.currentView = 'tools';
+    document.querySelectorAll('.section-legal-content').forEach(s => s.classList.add('disabled'));
+    document.querySelectorAll('.sidebar-legal-options').forEach(s => s.classList.add('disabled'));
+    document.querySelectorAll('.sidebar-top').forEach(s => s.classList.remove('disabled'));
+    activateSection('everything');
+}
 
-    if (sidebarButtons.length === 0) {
-        return;
-    }
-
-    for (let i = 0; i < sidebarButtons.length; i++) {
-        const button = sidebarButtons[i];
-        const icon = button.querySelector('.material-symbols-rounded');
-        if (icon) {
-            const iconName = icon.textContent.trim();
-            const sectionName = iconToSection[iconName];
-
+function initSectionManagement() {
+    // Event listeners para los botones de herramientas
+    document.querySelectorAll('.sidebar-top .sidebar-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const sectionName = button.dataset.sectionName;
             if (sectionName) {
-                button.addEventListener('click', function (sectionName) {
-                    return function (e) {
-                        e.preventDefault();
-                        activateSection(sectionName);
-                    };
-                }(sectionName));
+                if (sectionStates.currentView !== 'tools') {
+                    switchToToolsView();
+                }
+                activateSection(sectionName);
             }
-        }
-    }
+        });
+    });
 
-    activateSection('everything', false);
+    // Event listeners para los links de políticas en el Control Center
+    document.querySelector('.module-control-center').addEventListener('click', (e) => {
+        const legalLink = e.target.closest('[data-action="privacy-policy"], [data-action="terms-conditions"], [data-action="cookies-policy"]');
+        if (legalLink) {
+            const sectionName = legalLink.dataset.action;
+            switchToLegalView(sectionName);
+            deactivateModule('controlCenter');
+        }
+    });
+
+    // Event listeners para los botones en la barra lateral de políticas
+    document.querySelectorAll('.sidebar-legal-options .sidebar-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const action = button.dataset.action;
+            const sectionName = button.dataset.sectionName;
+            if (action === 'back-to-tools') {
+                switchToToolsView();
+            } else if (sectionName) {
+                activateSection(sectionName);
+            }
+        });
+    });
+
+    // Estado inicial
+    switchToToolsView();
 }
+
 
 // ========== PUBLIC FUNCTIONS FOR EXTERNAL SECTION MANAGEMENT ==========
 
 function getActiveSection() {
-    const sections = Object.keys(activeSectionStates);
-    for (let i = 0; i < sections.length; i++) {
-        if (activeSectionStates[sections[i]]) {
-            return sections[i];
-        }
-    }
-    return null;
-}
-
-function getAllSectionStates() {
-    const copy = {};
-    const sections = Object.keys(activeSectionStates);
-    for (let i = 0; i < sections.length; i++) {
-        copy[sections[i]] = activeSectionStates[sections[i]];
-    }
-    return copy;
-}
-
-function switchToSection(sectionName) {
-    if (activeSectionStates.hasOwnProperty(sectionName)) {
-        activateSection(sectionName);
-        return true;
-    }
-    return false;
+    return sectionStates.activeSection;
 }
 
 // ========== INITIALIZATION - DELEGATED TO MODULE MANAGER ==========
@@ -325,15 +278,12 @@ function getCurrentActiveOverlay() {
         if (activeOverlay) {
             const dataMenu = activeOverlay.getAttribute('data-menu');
             
-            // ===== CÓDIGO CORREGIDO =====
-            // Las claves ahora coinciden con los atributos data-menu (minúsculas y camelCase)
             const overlayMap = {
                 'alarm': 'menuAlarm',
                 'timer': 'menuTimer',
                 'worldClock': 'menuWorldClock',
                 'paletteColors': 'menuPaletteColors'
             };
-            // ===== FIN DEL CÓDIGO CORREGIDO =====
             
             return overlayMap[dataMenu] || null;
         }
@@ -364,7 +314,6 @@ function switchControlCenterMenu(menuName) {
 
 function logAllStates() {
     console.group('🌙 ProjectNocturne - Complete System Status');
-    logSectionStates();
     logModuleStates();
     console.log('📊 Active Module:', getActiveModule() || 'None');
     console.log('📊 Any Module Active:', isAnyModuleActive());
@@ -377,8 +326,7 @@ function logAllStates() {
 function getSystemStatus() {
     return {
         sections: {
-            active: getActiveSection(),
-            all: getAllSectionStates()
+            active: getActiveSection()
         },
         modules: {
             active: getActiveModule(),
@@ -533,20 +481,24 @@ function getAppliedTextStyle() {
 // ========== INITIALIZE TEXT STYLE MANAGER ==========
 document.addEventListener('DOMContentLoaded', initializeTextStyleManager);
 
+// Call initSectionManagement after the DOM is loaded
+document.addEventListener('DOMContentLoaded', initSectionManagement);
+
+
 // ========== EXPORTS - COMPLETE AND UNIFIED FUNCTIONS ==========
 
 export {
     activateControlCenterMenu, activateModuleByName as activateModule, activateSection, activateSpecificOverlay,
     closeActiveModule, closeAllModules, closeControlCenter, closeOverlayByName, closeOverlays,
     deactivateModule, dispatchModuleEvent, executeWhenModuleReady, getActiveModule, getActiveSection,
-    getAllSectionStates, getAppliedColor, getAppliedFontScale, getAppliedTextStyle, getCurrentActiveOverlay,
+    getAppliedColor, getAppliedFontScale, getAppliedTextStyle, getCurrentActiveOverlay,
     getModuleInfo, getModulePreference, getSystemStatus, initControlCenter, initNewOverlayModules,
-    initSidebarMobile, initSidebarSections, isAnyModuleActive, isAnyOverlayActive, isControlCenterActive
+    initSidebarMobile, initSectionManagement as initSidebarSections, isAnyModuleActive, isAnyOverlayActive, isControlCenterActive
 };
 
 export {
-    isModuleActive, isModuleBusy, isModuleCurrentlyChanging, logAllStates, logModuleStates, logSectionStates,
+    isModuleActive, isModuleBusy, isModuleCurrentlyChanging, logAllStates, logModuleStates,
     onModuleActivated, onModuleDeactivated, onOverlayChanged, resetModuleChangeFlag, setModulePreference,
-    showControlCenterMenu, showSpecificOverlay, switchControlCenterMenu, switchOverlay, switchToSection,
+    showControlCenterMenu, showSpecificOverlay, switchControlCenterMenu, switchOverlay,
     toggleModuleByName as toggleModule, waitForModuleReady
 };
