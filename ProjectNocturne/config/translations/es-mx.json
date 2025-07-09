@@ -136,7 +136,11 @@
     "suggestion_type_other": "Otro",
     "suggestion_message": "Escribir mensaje",
     "write_suggestion_message": "Escribir mensaje",
-    "send_suggestion": "Enviar Sugerencia"
+    "send_suggestion": "Enviar Sugerencia",
+    "help_and_resources": "Ayuda y recursos",
+    "whats_new": "Novedades",
+    "terms_and_conditions": "Términos y condiciones",
+    "cookies_policy": "Política de cookies"
   },
   "search": {
     "no_results": "No se encontraron resultados para",

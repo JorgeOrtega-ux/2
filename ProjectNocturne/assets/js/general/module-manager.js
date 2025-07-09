@@ -40,13 +40,16 @@ const MODULE_CONFIG = {
     }
 };
 
+// ========== CORRECCIÓN CLAVE: AÑADIDO EL NUEVO MENÚ ==========
 const CONTROL_CENTER_MENUS = {
     'control_center': 'control_center',
     'appearance': 'appearance',
     'language': 'language',
     'settings': 'settings',
-    'location': 'location'
+    'location': 'location',
+    'help_and_resources': 'help_and_resources'
 };
+// ========== FIN DE LA CORRECCIÓN ==========
 
 const INDEPENDENT_OVERLAYS = {
     'menuAlarm': '[data-menu="alarm"]',
@@ -466,7 +469,7 @@ function performModuleDeactivation(moduleName) {
         if (overlayToReset) {
             const menuElement = document.querySelector(INDEPENDENT_OVERLAYS[overlayToReset]);
             const isEditing = menuElement && menuElement.hasAttribute('data-editing-id');
-            
+
             // SIEMPRE resetear el menú, independientemente del modo edición
             // para limpiar spinners y otros estados temporales
             resetMenuForOverlay(overlayToReset);

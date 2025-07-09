@@ -10,15 +10,23 @@
                         <span class="material-symbols-rounded">settings</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="settings" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="settings" data-translate-category="menu"></span>
                     </div>
                 </div>
-                <div class="menu-link">
+                <div class="menu-link" data-toggle="help_and_resources">
                     <div class="menu-link-icon">
-                        <span class="material-symbols-rounded">policy</span>
+                        <span class="material-symbols-rounded">help</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="privacy_policy" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="help_and_resources" data-translate-category="menu"></span>
+                    </div>
+                </div>
+                <div class="menu-link" data-action="whats-new">
+                    <div class="menu-link-icon">
+                        <span class="material-symbols-rounded">new_releases</span>
+                    </div>
+                    <div class="menu-link-text">
+                        <span data-translate="whats_new" data-translate-category="menu"></span>
                     </div>
                 </div>
                 <div class="menu-link" data-action="suggest-improvements">
@@ -26,7 +34,7 @@
                         <span class="material-symbols-rounded">emoji_objects</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="suggest_improvements" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="suggest_improvements" data-translate-category="menu"></span>
                     </div>
                 </div>
             </div>
@@ -44,7 +52,7 @@
                         <span class="material-symbols-rounded">palette</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="appearance" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="appearance" data-translate-category="menu"></span>
                     </div>
                 </div>
                 <div class="menu-link" data-toggle="language">
@@ -52,7 +60,7 @@
                         <span class="material-symbols-rounded">language</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="language" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="language" data-translate-category="menu"></span>
                     </div>
                 </div>
                 <div class="menu-link" data-toggle="location">
@@ -60,7 +68,7 @@
                         <span class="material-symbols-rounded">location_on</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="location" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="location" data-translate-category="menu"></span>
                     </div>
                 </div>
             </div>
@@ -78,7 +86,7 @@
                         <span class="material-symbols-rounded">computer</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="sync_with_system" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="sync_with_system" data-translate-category="menu"></span>
                     </div>
                 </div>
                 <div class="menu-link" data-theme="dark">
@@ -86,7 +94,7 @@
                         <span class="material-symbols-rounded">dark_mode</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="dark_theme" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="dark_theme" data-translate-category="menu"></span>
                     </div>
                 </div>
                 <div class="menu-link" data-theme="light">
@@ -94,7 +102,7 @@
                         <span class="material-symbols-rounded">light_mode</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="light_theme" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="light_theme" data-translate-category="menu"></span>
                     </div>
                 </div>
             </div>
@@ -112,7 +120,7 @@
                         <span class="material-symbols-rounded">flag</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="english_us" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="english_us" data-translate-category="menu"></span>
                     </div>
                 </div>
                 <div class="menu-link" data-language="es-mx">
@@ -120,7 +128,7 @@
                         <span class="material-symbols-rounded">flag</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="spanish_mx" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="spanish_mx" data-translate-category="menu"></span>
                     </div>
                 </div>
                 <div class="menu-link" data-language="fr-fr">
@@ -128,7 +136,7 @@
                         <span class="material-symbols-rounded">flag</span>
                     </div>
                     <div class="menu-link-text">
-                        <span data-translate="french_fr" data-translate-category="menu" data-translate-target="text"></span>
+                        <span data-translate="french_fr" data-translate-category="menu"></span>
                     </div>
                 </div>
             </div>
@@ -151,6 +159,40 @@
         </div>
         <div class="menu-body overflow-y">
             <div class="menu-list"></div>
+        </div>
+    </div>
+
+    <div class="menu-control-center disabled overflow-y" data-menu="help_and_resources">
+        <div class="pill-container">
+            <div class="drag-handle"></div>
+        </div>
+        <div class="menu-body">
+            <div class="menu-list">
+                <div class="menu-link" data-action="privacy-policy">
+                    <div class="menu-link-icon">
+                        <span class="material-symbols-rounded">policy</span>
+                    </div>
+                    <div class="menu-link-text">
+                        <span data-translate="privacy_policy" data-translate-category="menu"></span>
+                    </div>
+                </div>
+                <div class="menu-link" data-action="terms-conditions">
+                    <div class="menu-link-icon">
+                        <span class="material-symbols-rounded">gavel</span>
+                    </div>
+                    <div class="menu-link-text">
+                        <span data-translate="terms_and_conditions" data-translate-category="menu"></span>
+                    </div>
+                </div>
+                <div class="menu-link" data-action="cookies-policy">
+                    <div class="menu-link-icon">
+                        <span class="material-symbols-rounded">cookie</span>
+                    </div>
+                    <div class="menu-link-text">
+                        <span data-translate="cookies_policy" data-translate-category="menu"></span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
