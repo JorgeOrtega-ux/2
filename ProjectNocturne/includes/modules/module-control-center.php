@@ -21,14 +21,6 @@
                         <span data-translate="help_and_resources" data-translate-category="menu"></span>
                     </div>
                 </div>
-                <div class="menu-link" data-action="whats-new">
-                    <div class="menu-link-icon">
-                        <span class="material-symbols-rounded">new_releases</span>
-                    </div>
-                    <div class="menu-link-text">
-                        <span data-translate="whats_new" data-translate-category="menu"></span>
-                    </div>
-                </div>
                 <div class="menu-link" data-action="suggest-improvements">
                     <div class="menu-link-icon">
                         <span class="material-symbols-rounded">emoji_objects</span>

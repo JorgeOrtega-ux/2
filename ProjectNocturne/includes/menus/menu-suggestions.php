@@ -18,8 +18,21 @@
                 </div>
             </div>
             <div class="menu-content-scrolleable overflow-y">
+                <div class="creation-wrapper">
                 <div class="menu-section-center">
                     <div class="menu-content-wrapper active">
+                          <div class="menu-content">
+                            <div class="menu-content-header">
+                                <div class="menu-content-header-primary">
+                                    <span class="material-symbols-rounded">email</span>
+                                    <span>Correo Electrónico</span> </div>
+                            </div>
+                            <div class="menu-content-general">
+                                <div class="enter-text-tool">
+                                     <input type="email" id="suggestion-email" name="email" placeholder="tucorreo@ejemplo.com" required>
+                                </div>
+                            </div>
+                        </div>
                         <div class="menu-content">
                             <div class="menu-content-header">
                                 <div class="menu-content-header-primary">
@@ -52,20 +65,10 @@
                             </div>
                         </div>
 
-                        <div class="menu-content">
-                            <div class="menu-content-header">
-                                <div class="menu-content-header-primary">
-                                    <span class="material-symbols-rounded">email</span>
-                                    <span>Correo Electrónico</span> </div>
-                            </div>
-                            <div class="menu-content-general">
-                                <div class="enter-text-tool">
-                                     <input type="email" id="suggestion-email" name="email" placeholder="tucorreo@ejemplo.com" required>
-                                </div>
-                            </div>
-                        </div>
+                      
 
                     </div>
+                </div>
                 </div>
             </div>
             <div class="menu-section-bottom">
