@@ -158,6 +158,7 @@ export function initializeEverything() {
     updateCurrentDate();
     smartUpdateInterval = setInterval(updateCurrentDate, 1000);
     document.addEventListener('translationsApplied', updateEverythingWidgets);
+    document.addEventListener('timeFormatChanged', updateCurrentDate); // Add this line
 }
 
 function updateCurrentDate() {

@@ -270,6 +270,9 @@ export function toggleTimeFormat() {
     if (timePickerMenu && timePickerMenu.classList.contains('active')) {
         populateHourSelectionMenu();
     }
+    // Dispatch a custom event to notify other modules
+    const event = new CustomEvent('timeFormatChanged');
+    document.dispatchEvent(event);
 }
 
 function updateTimeFormatInAllSections() {
