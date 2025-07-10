@@ -1428,6 +1428,104 @@ async function handleMenuClick(event, parentMenu) {
         }
     }
 }
+
+function initializeSuggestionForm() {
+    const suggestionForm = document.getElementById('suggestion-form');
+    if (!suggestionForm) return;
+
+    suggestionForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const submitButton = suggestionForm.querySelector('button[type="submit"]');
+        
+        // Validación del lado del cliente antes de enviar
+        const messageInput = suggestionForm.querySelector('#suggestion-text');
+        const emailInput = suggestionForm.querySelector('#suggestion-email');
+        
+        let isValid = true;
+        if (messageInput.value.trim() === '') {
+            messageInput.classList.add('input-error'); // Asume que tienes un estilo para .input-error
+            isValid = false;
+        } else {
+            messageInput.classList.remove('input-error');
+        }
+
+        if (emailInput.value.trim() === '' || !/^\S+@\S+\.\S+$/.test(emailInput.value)) {
+            emailInput.parentElement.classList.add('input-error'); // Estilo al contenedor
+            isValid = false;
+        } else {
+            emailInput.parentElement.classList.remove('input-error');
+        }
+
+        if (!isValid) {
+            if (navigator.vibrate) navigator.vibrate(100);
+            return; // Detiene el envío si la validación falla
+        }
+
+        const formData = new FormData(suggestionForm);
+        const suggestionTypeValue = document.getElementById('suggestion-type-value').value;
+        formData.set('suggestion_type', suggestionTypeValue);
+
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.innerHTML = '<span class="material-symbols-rounded spinning">progress_activity</span>';
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(suggestionForm.action, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showDynamicIslandNotification('system', 'success', result.message || 'Sugerencia enviada con éxito.', 'notifications');
+                suggestionForm.reset();
+                // Resetear el selector de tipo visualmente
+                document.getElementById('suggestion-type-display').setAttribute('data-translate', 'suggestion_type_improvement');
+                document.getElementById('suggestion-type-display').textContent = getTranslation('suggestion_type_improvement', 'menu');
+                document.getElementById('suggestion-type-value').value = 'improvement';
+                deactivateModule('toggleSuggestionMenu');
+            } else {
+                showDynamicIslandNotification('system', 'error', result.message || 'Ocurrió un error.', 'notifications');
+            }
+
+        } catch (error) {
+            console.error('Error submitting suggestion:', error);
+            showDynamicIslandNotification('system', 'error', 'No se pudo conectar con el servidor.', 'notifications');
+        } finally {
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+        }
+    });
+
+    // Lógica para el botón de cancelar
+    const cancelButton = suggestionForm.querySelector('[data-action="cancel-suggestion"]');
+    if (cancelButton) {
+        cancelButton.addEventListener('click', () => {
+            deactivateModule('toggleSuggestionMenu');
+        });
+    }
+
+    // Lógica para actualizar el valor del campo oculto al seleccionar un tipo
+    const suggestionTypesMenu = document.querySelector('.menu-suggestion-types');
+    if (suggestionTypesMenu) {
+        suggestionTypesMenu.addEventListener('click', (e) => {
+            const selectedTypeElement = e.target.closest('[data-action="select-suggestion-type"]');
+            if (selectedTypeElement) {
+                const value = selectedTypeElement.dataset.value;
+                const hiddenInput = document.getElementById('suggestion-type-value');
+                if (hiddenInput) {
+                    hiddenInput.value = value;
+                }
+            }
+        });
+    }
+}
+
+// Llama a esta función en la inicialización de tu app.
+document.addEventListener('DOMContentLoaded', initializeSuggestionForm);
+
 window.getCurrentlyPlayingSoundId = () => currentlyPlayingSound ? currentlyPlayingSound.id : null;
 export function initMenuInteractions() {
     setupGlobalEventListeners();

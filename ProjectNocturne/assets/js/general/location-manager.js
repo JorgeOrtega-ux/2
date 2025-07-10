@@ -1,5 +1,59 @@
 import { getTranslation } from '../general/translations-controller.js';
 
+// --- LÓGICA DE SEGUIMIENTO DE ACTIVIDAD (ACTUALIZADA) ---
+const USER_UUID_KEY = 'user-unique-id';
+
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+    });
+}
+
+function getBrowserInfo() {
+    const ua = navigator.userAgent;
+    let tem, M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+    if (/trident/i.test(M[1])) {
+        tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+        return { name: 'IE', version: (tem[1] || '') };
+    }
+    if (M[1] === 'Chrome') {
+        tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
+        if (tem != null) return { name: tem[1].replace('OPR', 'Opera'), version: tem[2] };
+    }
+    M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
+    if ((tem = ua.match(/version\/(\d+)/i)) != null) M.splice(1, 1, tem[1]);
+    return { name: M[0], version: M[1] };
+}
+
+function getOperatingSystem() {
+    const userAgent = window.navigator.userAgent;
+    if (userAgent.includes("Win")) return "Windows";
+    if (userAgent.includes("Mac")) return "MacOS/iOS";
+    if (userAgent.includes("Linux")) return "Linux";
+    if (userAgent.includes("Android")) return "Android";
+    return "Unknown";
+}
+
+async function trackUserActivity(uuid, countryName, osName, browserInfo, language) {
+    if (!uuid || !countryName) return;
+    try {
+        await fetch('api/track-activity.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                uuid,
+                country: countryName,
+                os: osName,
+                browser: browserInfo.name,
+                browser_version: browserInfo.version,
+                language: language
+            }),
+        });
+    } catch (error) {
+        console.error('Error al contactar el servicio de seguimiento de actividad:', error);
+    }
+}
 // --- CONFIGURACIÓN Y ESTADO CENTRALIZADO ---
 const LOCATION_STORAGE_KEY = 'user-location';
 const IPWHO_API_URL = 'https://ipwho.is/';
@@ -33,12 +87,43 @@ async function initLocationManager() {
         const event = new CustomEvent('locationChanged', { detail: { country: state.selectedCountry } });
         document.dispatchEvent(event);
 
+        // Después de detectar la ubicación, iniciamos el seguimiento.
+        handleActivityTracking();
+
     } catch (error) {
         console.error("❌ Error initializing Location Manager:", error);
     } finally {
         state.isInitialized = true;
     }
 }
+
+/**
+ * Orquesta la obtención del UUID, país y SO para el seguimiento.
+ */
+function handleActivityTracking() {
+    let userUUID = localStorage.getItem(USER_UUID_KEY);
+    if (!userUUID) {
+        userUUID = generateUUID();
+        localStorage.setItem(USER_UUID_KEY, userUUID);
+    }
+
+    const os = getOperatingSystem();
+    const browser = getBrowserInfo();
+    const language = navigator.language || navigator.userLanguage;
+    const currentCountry = getCurrentLocation();
+
+    if (currentCountry && currentCountry.name) {
+        trackUserActivity(userUUID, currentCountry.name, os, browser, language);
+    } else {
+        document.addEventListener('locationChanged', function onLocationFirstDetected(e) {
+            if (e.detail.country && e.detail.country.name) {
+                trackUserActivity(userUUID, e.detail.country.name, os, browser, language);
+                document.removeEventListener('locationChanged', onLocationFirstDetected);
+            }
+        }, { once: true });
+    }
+}
+
 
 function applyCountryChange(country) {
     if (state.isChanging || (state.selectedCountry && state.selectedCountry.code === country.code)) {

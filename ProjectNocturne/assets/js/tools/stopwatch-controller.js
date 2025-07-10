@@ -3,6 +3,7 @@
 import { getTranslation } from '../general/translations-controller.js';
 import { showDynamicIslandNotification } from '../general/dynamic-island-controller.js';
 import { updateEverythingWidgets } from './everything-controller.js';
+import { trackEvent } from '../general/event-tracker.js'; // <-- AÑADIDO
 
 const stopwatchState = {
     isRunning: false,
@@ -118,6 +119,10 @@ function getUpdateInterval() {
 function startStopwatch(isReload = false) {
     if (stopwatchState.isRunning && !isReload) return;
 
+    if (!isReload) {
+        trackEvent('interaction', 'start_stopwatch'); // <-- EVENTO AÑADIDO
+    }
+
     stopwatchState.isRunning = true;
 
     if (!isReload) {
@@ -138,6 +143,8 @@ function startStopwatch(isReload = false) {
 function stopStopwatch() {
     if (!stopwatchState.isRunning) return;
 
+    trackEvent('interaction', 'stop_stopwatch'); // <-- EVENTO AÑADIDO
+
     stopwatchState.isRunning = false;
     stopwatchState.elapsedTime = Date.now() - stopwatchState.startTime;
     clearInterval(stopwatchState.timerInterval);
@@ -147,6 +154,8 @@ function stopStopwatch() {
 }
 
 function resetStopwatch() {
+    trackEvent('interaction', 'reset_stopwatch'); // <-- EVENTO AÑADIDO
+    
     stopwatchState.isRunning = false;
     clearInterval(stopwatchState.timerInterval);
 
@@ -165,6 +174,8 @@ function resetStopwatch() {
 
 function recordLap() {
     if (!stopwatchState.isRunning) return;
+
+    trackEvent('interaction', 'record_lap'); // <-- EVENTO AÑADIDO
 
     const lapLimit = getLapLimit();
 
@@ -252,6 +263,8 @@ function changeFormat() {
 }
 
 function exportLaps() {
+    trackEvent('interaction', 'export_laps'); // <-- EVENTO AÑADIDO
+
     if (typeof XLSX === 'undefined') {
         console.error("La librería XLSX no está cargada. Asegúrate de incluirla en tu HTML.");
         showDynamicIslandNotification('system', 'error', 'Error al exportar. Intenta de nuevo.', 'notifications');

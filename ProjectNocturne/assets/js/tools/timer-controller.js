@@ -6,6 +6,7 @@ import { playSound, stopSound, initializeSortable, getAvailableSounds, handleTim
 import { showDynamicIslandNotification, hideDynamicIsland } from '../general/dynamic-island-controller.js';
 import { updateEverythingWidgets } from './everything-controller.js';
 import { showModal } from '../general/menu-interactions.js';
+import { trackEvent } from '../general/event-tracker.js'; // <-- AÑADIDO
 
 const TIMERS_STORAGE_KEY = 'user-timers';
 const DEFAULT_TIMERS_STORAGE_KEY = 'default-timers-order';
@@ -308,6 +309,8 @@ function startTimer(timerId) {
 
     console.log(`▶️ Iniciando timer ${timerId}`);
 
+    trackEvent('interaction', 'start_timer'); // <-- EVENTO AÑADIDO
+
     handlePinTimer(timerId);
     clearRangAtTag(timerId);
 
@@ -331,6 +334,8 @@ function startTimer(timerId) {
 function pauseTimer(timerId) {
     const timer = findTimerById(timerId);
     if (!timer || !timer.isRunning) return;
+
+    trackEvent('interaction', 'pause_timer'); // <-- EVENTO AÑADIDO
 
     timer.isRunning = false;
     if (activeTimers.has(timer.id)) {
@@ -363,6 +368,7 @@ function resetTimer(timerId) {
     if (!timer) return;
 
     console.log(`🔄 Reseteando timer ${timerId}`);
+    trackEvent('interaction', 'reset_timer'); // <-- EVENTO AÑADIDO
 
     timer.isRunning = false;
     if (activeTimers.has(timerId)) {
@@ -390,6 +396,7 @@ function resetTimer(timerId) {
 
 export function updateTimer(timerId, newData) {
     console.log(`✏️ Editando timer ${timerId}`);
+    trackEvent('interaction', 'edit_timer'); // <-- EVENTO AÑADIDO
     
     const timerIndex = userTimers.findIndex(t => t.id === timerId);
     const defaultTimerIndex = defaultTimersState.findIndex(t => t.id === timerId);
@@ -1085,6 +1092,7 @@ export function addTimerAndRender(timerData) {
     }
 
     userTimers.push(newTimer);
+    trackEvent('interaction', 'create_timer'); // <-- EVENTO AÑADIDO
 
     if ((userTimers.length + defaultTimersState.length) === 1 || ![...userTimers, ...defaultTimersState].some(t => t.isPinned)) {
         newTimer.isPinned = true;
@@ -1268,6 +1276,8 @@ function updateTimerCounts() {
 function handlePinTimer(timerId) {
     if (pinnedTimerId === timerId) return;
 
+    trackEvent('interaction', 'pin_timer'); // <-- EVENTO AÑADIDO
+
     const allTimers = [...userTimers, ...defaultTimersState];
     allTimers.forEach(t => t.isPinned = (t.id === timerId));
     pinnedTimerId = timerId;
@@ -1313,6 +1323,7 @@ function handleDeleteTimer(timerId) {
     const timerName = timerToDelete.id.startsWith('default-timer-') ? getTranslation(timerToDelete.title, 'timer') : timerToDelete.title;
 
     showModal('confirmation', { type: 'timer', name: timerName }, () => {
+        trackEvent('interaction', 'delete_timer'); // <-- EVENTO AÑADIDO
         if (activeTimers.has(timerId)) {
             clearTimeout(activeTimers.get(timerId));
             activeTimers.delete(timerId);

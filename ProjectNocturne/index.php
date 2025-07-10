@@ -76,7 +76,7 @@
     <script type="module" src="assets/js/general/dynamic-island-controller.js"></script>
     <script type="module" src="assets/js/general/menu-interactions.js"></script>
     <script type="module" src="assets/js/general/color-search-system.js"></script>
-
+<script type="module" src="assets/js/general/event-tracker.js"></script>
     <script type="module" src="assets/js/components/palette-colors.js"></script>
 
     <script type="module" src="assets/js/tools/general-tools.js"></script>

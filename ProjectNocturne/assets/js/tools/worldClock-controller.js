@@ -6,6 +6,7 @@ import { showDynamicIslandNotification } from '../general/dynamic-island-control
 import { updateEverythingWidgets } from './everything-controller.js';
 import { getTranslation } from '../general/translations-controller.js';
 import { showModal } from '../general/menu-interactions.js';
+import { trackEvent } from '../general/event-tracker.js'; // <-- AÑADIDO
 
 const clockIntervals = new Map();
 const CLOCKS_STORAGE_KEY = 'world-clocks';
@@ -81,13 +82,17 @@ function createWorldClockSearchResultItem(clock) {
                      <div class="menu-link" data-action="edit-clock">
                          <div class="menu-link-icon"><span class="material-symbols-rounded">edit</span></div>
                          <div class="menu-link-text">
-                             <span data-translate="edit_clock" data-translate-category="world_clock_options" data-translate-target="text">${editText}</span>
+                             <span data-translate="edit_clock"
+                                      data-translate-category="world_clock_options"
+                                      data-translate-target="text">${editText}</span>
                          </div>
                      </div>
                      <div class="menu-link" data-action="delete-clock">
                          <div class="menu-link-icon"><span class="material-symbols-rounded">delete</span></div>
                          <div class="menu-link-text">
-                             <span data-translate="delete_clock" data-translate-category="world_clock_options" data-translate-target="text">${deleteText}</span>
+                             <span data-translate="delete_clock"
+                                      data-translate-category="world_clock_options"
+                                      data-translate-target="text">${deleteText}</span>
                          </div>
                      </div>
                  </div>
@@ -320,6 +325,9 @@ function createAndStartClockCard(title, country, timezone, existingId = null, sa
         );
         return;
     }
+    if (save) {
+        trackEvent('interaction', 'create_clock'); // <-- EVENTO AÑADIDO
+    }
     const ct = window.ct;
     const countryForTimezone = ct.getCountryForTimezone(timezone);
     const timezoneObject = countryForTimezone ? ct.getTimezonesForCountry(countryForTimezone.id)?.find(tz => tz.name === timezone) : null;
@@ -409,6 +417,8 @@ function updateClockCard(id, newData) {
     const card = document.getElementById(id);
     if (!card) return;
 
+    trackEvent('interaction', 'edit_clock'); // <-- EVENTO AÑADIDO
+
     // Actualiza los atributos de datos en el elemento de la tarjeta
     card.setAttribute('data-title', newData.title);
     card.setAttribute('data-country', newData.country);
@@ -437,7 +447,7 @@ function updateClockCard(id, newData) {
 
     // Busca y muestra el desplazamiento UTC
     const timezoneObject = countryForTimezone ? ct.getTimezonesForCountry(countryForTimezone.id)?.find(tz => tz.name === newData.timezone) : null;
-    const utcOffsetText = timezoneObject ? `UTC ${timezoneObject.utcOffsetStr}` : '';
+    const utcOffsetText = timezoneObject ? `UTC ${tzObject.utcOffsetStr}` : '';
     const offsetElement = card.querySelector('.card-tag');
     if (offsetElement) {
         offsetElement.textContent = utcOffsetText;
@@ -541,9 +551,15 @@ function initializeSortableGrid() {
 function pinClock(button) {
     const card = button.closest('.tool-card, .search-result-item');
     if (!card) return;
+
+    const clockId = card.dataset.id;
+    if (clockId !== 'local') {
+      trackEvent('interaction', 'pin_clock'); // <-- EVENTO AÑADIDO
+    }
+
     const allPinButtons = document.querySelectorAll('.card-pin-btn');
     allPinButtons.forEach(btn => btn.classList.remove('active'));
-    const clockId = card.dataset.id;
+    
     const mainCardPinBtn = document.querySelector(`.tool-card[data-id="${clockId}"] .card-pin-btn`);
     if (mainCardPinBtn) mainCardPinBtn.classList.add('active');
     button.classList.add('active');
@@ -560,6 +576,7 @@ function deleteClock(clockId) {
     const clockTitle = card.dataset.title;
 
     showModal('confirmation', { type: 'world-clock', name: clockTitle }, () => {
+        trackEvent('interaction', 'delete_clock'); // <-- EVENTO AÑADIDO
         const isPinned = card.querySelector('.card-pin-btn.active');
 
         if (clockIntervals.has(card)) {

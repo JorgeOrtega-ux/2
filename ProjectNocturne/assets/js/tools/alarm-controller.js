@@ -6,6 +6,7 @@ import { showDynamicIslandNotification, hideDynamicIsland } from '../general/dyn
 import { updateEverythingWidgets } from './everything-controller.js';
 import { getTranslation } from '../general/translations-controller.js';
 import { showModal } from '../general/menu-interactions.js';
+import { trackEvent } from '../general/event-tracker.js'; 
 
 const ALARMS_STORAGE_KEY = 'user-alarms';
 const DEFAULT_ALARMS_STORAGE_KEY = 'default-alarms-order';
@@ -649,6 +650,7 @@ function createAlarm(title, hour, minute, sound) {
         type: 'user',
         created: new Date().toISOString()
     };
+    trackEvent('interaction', 'create_alarm');
     userAlarms.push(alarm);
     saveAlarmsToStorage();
     renderAllAlarmCards();
@@ -788,6 +790,7 @@ function deleteAlarm(alarmId) {
     if (window.hideDynamicIsland) {
         window.hideDynamicIsland();
     }
+    trackEvent('interaction', 'delete_alarm');
     showDynamicIslandNotification('alarm', 'deleted', 'alarm_deleted', 'notifications', { title: originalTitle });
     refreshSearchResults();
     updateEverythingWidgets();
