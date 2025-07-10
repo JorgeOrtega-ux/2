@@ -19,39 +19,59 @@ if (!$uuid) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT id FROM user_activity WHERE uuid = ?");
-$stmt->bind_param("s", $uuid);
-$stmt->execute();
-$result = $stmt->get_result();
+// =========================================================================
+// PASO 1: Insertar o actualizar el perfil principal del usuario
+// =========================================================================
+$sql_activity = "INSERT INTO user_activity (uuid, country, operating_system, browser, browser_version, preferred_language, last_activity)
+                 VALUES (?, ?, ?, ?, ?, ?, NOW())
+                 ON DUPLICATE KEY UPDATE
+                 last_activity = NOW(),
+                 browser = VALUES(browser),
+                 browser_version = VALUES(browser_version),
+                 preferred_language = VALUES(preferred_language)";
 
-if ($result->num_rows > 0) {
-    // Usuario Existente: Actualiza la actividad y la información del navegador/idioma
-    $updateStmt = $conn->prepare("UPDATE user_activity SET last_activity = NOW(), browser = ?, browser_version = ?, preferred_language = ? WHERE uuid = ?");
-    $updateStmt->bind_param("ssss", $browser, $browser_version, $language, $uuid);
-    
-    if ($updateStmt->execute()) {
-        echo json_encode(['success' => true, 'status' => 'updated']);
-    } else {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al actualizar la actividad.']);
-    }
-    $updateStmt->close();
+$stmt_activity = $conn->prepare($sql_activity);
 
-} else {
-    // Nuevo Usuario: Inserta registro completo
-    $insertStmt = $conn->prepare("INSERT INTO user_activity (uuid, country, operating_system, browser, browser_version, preferred_language) VALUES (?, ?, ?, ?, ?, ?)");
-    $insertStmt->bind_param("ssssss", $uuid, $country, $os, $browser, $browser_version, $language);
-
-    if ($insertStmt->execute()) {
-        http_response_code(201);
-        echo json_encode(['success' => true, 'status' => 'created']);
-    } else {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Error al registrar el nuevo usuario.']);
-    }
-    $insertStmt->close();
+if ($stmt_activity === false) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Error al preparar la consulta de actividad: ' . $conn->error]);
+    exit;
 }
 
-$stmt->close();
+$stmt_activity->bind_param("ssssss", $uuid, $country, $os, $browser, $browser_version, $language);
+
+if ($stmt_activity->execute()) {
+    // Si affected_rows es 1, significa que se insertó una nueva fila (usuario nuevo).
+    // Si es 2, significa que una fila existente fue actualizada.
+    // Si es 0, no hubo cambios.
+    $is_new_user = ($conn->affected_rows === 1);
+
+    // =============================================================================================
+    // PASO 2: Si es un usuario nuevo, crear su registro de métricas inmediatamente
+    // =============================================================================================
+    if ($is_new_user) {
+        // Usamos INSERT IGNORE para evitar errores si la fila ya existiera por alguna razón.
+        // Esto crea la fila con todos los contadores en su valor por defecto (0).
+        $sql_metrics = "INSERT IGNORE INTO user_metrics (user_uuid) VALUES (?)";
+        $stmt_metrics = $conn->prepare($sql_metrics);
+        
+        if ($stmt_metrics) {
+            $stmt_metrics->bind_param("s", $uuid);
+            $stmt_metrics->execute();
+            $stmt_metrics->close();
+        }
+    }
+    
+    $status = $is_new_user ? 'created' : 'updated';
+    $http_code = ($status === 'created') ? 201 : 200;
+    http_response_code($http_code);
+    echo json_encode(['success' => true, 'status' => $status]);
+
+} else {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Error al registrar la actividad del usuario.']);
+}
+
+$stmt_activity->close();
 $conn->close();
 ?>
