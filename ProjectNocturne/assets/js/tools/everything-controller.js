@@ -11,11 +11,11 @@ const WIDGET_DEFINITIONS = {
                 <div class="clock-date" id="main-clock-date"></div>
             </div>
             <div class="add-button-container">
-                <button class="header-button add-btn" data-action="toggle-add-menu" data-translate="add_element" data-translate-category="tooltips" data-translate-target="tooltip">
-                    <span class="material-symbols-rounded">add</span>
-                </button>
                 <button class="header-button" data-action="toggle-time-format" data-translate="change_format" data-translate-category="tooltips" data-translate-target="tooltip">
                     <span class="material-symbols-rounded">schedule</span>
+                </button>
+                <button class="header-button add-btn" data-action="toggle-add-menu" data-translate="add_element" data-translate-category="tooltips" data-translate-target="tooltip">
+                    <span class="material-symbols-rounded">add</span>
                 </button>
                 <div class="dropdown-menu-container add-menu-custom disabled">
                     <div class="menu-list">
@@ -119,55 +119,38 @@ function updateActionCounts() {
     const timerMenuItem = document.querySelector('.add-menu-custom .menu-link[data-module="toggleMenuTimer"]');
     const clockMenuItem = document.querySelector('.add-menu-custom .menu-link[data-module="toggleMenuWorldClock"]');
 
-    // ========== VERIFICAR QUÉ ESTÁ SONANDO ESPECÍFICAMENTE ==========
     let isAnyAlarmRinging = false;
-    let isAnyTimerRinging = false;
-
-    // Verificar alarmas sonando
     if (window.alarmManager && typeof window.alarmManager.getAllAlarms === 'function') {
         const { userAlarms, defaultAlarms } = window.alarmManager.getAllAlarms();
         isAnyAlarmRinging = [...userAlarms, ...defaultAlarms].some(a => a.isRinging);
     }
 
-    // Verificar timers sonando
-    if (window.timerManager && typeof window.timerManager.getAllTimers === 'function') {
-        const { userTimers, defaultTimers } = window.timerManager.getAllTimers();
-        isAnyTimerRinging = [...userTimers, ...defaultTimers].some(t => t.isRinging);
-    }
-
-    // ========== BLOQUEAR SOLO LA TOOL QUE ESTÁ SONANDO ==========
-    
-    // ALARMAS: Bloquear si limite alcanzado O si una alarma está sonando
     if (alarmMenuItem && window.alarmManager) {
         const count = window.alarmManager.getAlarmCount();
         const limit = window.alarmManager.getAlarmLimit();
         const isAlarmDisabled = count >= limit || isAnyAlarmRinging;
         alarmMenuItem.classList.toggle('disabled-interactions', isAlarmDisabled);
-        
-        console.log(`🚨 Alarm menu: count=${count}/${limit}, ringing=${isAnyAlarmRinging}, disabled=${isAlarmDisabled}`);
     }
 
-    // TIMERS: Bloquear si limite alcanzado O si un timer está sonando O si otro timer está corriendo
+    // ========== INICIO DE LA CORRECCIÓN ==========
     if (timerMenuItem && window.timerManager) {
         const count = window.timerManager.getTimersCount();
         const limit = window.timerManager.getTimerLimit();
-        const runningCount = window.timerManager.getRunningTimersCount();
-        const isTimerDisabled = count >= limit || isAnyTimerRinging || runningCount > 0;
+        // Se elimina la comprobación de temporizadores activos o sonando.
+        // El botón solo se deshabilita si se alcanza el límite.
+        const isTimerDisabled = count >= limit;
         timerMenuItem.classList.toggle('disabled-interactions', isTimerDisabled);
-        
-        console.log(`⏲️ Timer menu: count=${count}/${limit}, ringing=${isAnyTimerRinging}, running=${runningCount}, disabled=${isTimerDisabled}`);
     }
+    // ========== FIN DE LA CORRECCIÓN ==========
 
-    // WORLD CLOCK: Solo bloquear por límite (nunca por sonidos)
     if (clockMenuItem && window.worldClockManager) {
         const count = window.worldClockManager.getClockCount();
         const limit = window.worldClockManager.getClockLimit();
         const isClockDisabled = count >= limit;
         clockMenuItem.classList.toggle('disabled-interactions', isClockDisabled);
-        
-        console.log(`🌍 Clock menu: count=${count}/${limit}, disabled=${isClockDisabled}`);
     }
 }
+
 
 export function initializeEverything() {
     if (smartUpdateInterval) clearInterval(smartUpdateInterval);

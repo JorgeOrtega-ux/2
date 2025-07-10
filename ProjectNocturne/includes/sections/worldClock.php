@@ -13,9 +13,7 @@
                     <div class="info-tool" data-timezone-worldclock></div>
                 </div>
             </div>
-            <div class="tool-options">
                 <?php include 'includes/components/tool-options.php'; ?>
-            </div>
         </div>
     </div>
     <div class="section-center">

@@ -54,7 +54,8 @@
 }
 
 .menu-button .spinning {
-    color: inherit; /* The color will be inherited from the button itself */
+    color: inherit;
+    /* The color will be inherited from the button itself */
 }
 
 
@@ -410,6 +411,7 @@
     flex: 1 1 auto;
     flex-direction: column;
 }
+
 .menu-section-selector {
     padding: 8px;
     border-bottom: 1px solid #00000020;
@@ -1027,11 +1029,13 @@
 .laps-table tbody tr {
     cursor: pointer;
 }
+
 .island-main-content {
     display: flex;
     flex-direction: row;
     gap: 8px;
 }
+
 .dynamic-island {
     position: fixed;
     top: 20px;
@@ -1223,7 +1227,7 @@
     .dynamic-island.active-tool-ringing {
         width: 320px;
     }
-    
+
     .dynamic-island.active-tool-ringing.small-viewport {
         width: 280px;
     }
@@ -1310,6 +1314,8 @@
 .add-button-container {
     position: absolute;
     top: 12px;
+    gap: 8px;
+    display: flex;
     right: 12px;
 }
 
@@ -1504,10 +1510,10 @@
     align-items: center;
 }
 
-.custom-select-wrapper--row > .custom-select-content {
+.custom-select-wrapper--row>.custom-select-content {
     flex: 1;
 }
 
-.custom-select-wrapper--row > .menu-action-button {
+.custom-select-wrapper--row>.menu-action-button {
     flex-shrink: 0;
 }
