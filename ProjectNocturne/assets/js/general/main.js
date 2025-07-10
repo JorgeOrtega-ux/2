@@ -4,7 +4,7 @@ import { activateModule, deactivateAllModules, deactivateModule, getActiveModule
 import { initializeTextStyleManager } from '../tools/general-tools.js';
 import { isGradientColor } from '../components/palette-colors.js';
 import { populateHourSelectionMenu } from './menu-interactions.js';
-import { trackEvent } from './event-tracker.js'; 
+import { trackEvent } from '../general/event-tracker.js'; 
 
 // ========== GLOBAL TIME FORMAT SETTING ==========
 export let use24HourFormat = true;
@@ -156,7 +156,12 @@ function activateSection(sectionName, showLog = true) {
     const event = new CustomEvent('sectionChanged', {
         detail: { activeSection: sectionName, view: sectionStates.currentView, states: activeSectionStates }
     });
-    trackEvent('tool_used', sectionName);
+    
+    // ----- INICIO DE LA MODIFICACIÓN -----
+    // Se registra el evento de visita a la sección.
+    trackEvent('section_visit', sectionName);
+    // ----- FIN DE LA MODIFICACIÓN -----
+
     document.dispatchEvent(event);
 }
 

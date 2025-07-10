@@ -1435,23 +1435,23 @@ function initializeSuggestionForm() {
 
     suggestionForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-
-        const submitButton = suggestionForm.querySelector('button[type="submit"]');
         
-        // Validación del lado del cliente antes de enviar
+        // ----- INICIO DE LA MODIFICACIÓN -----
+
+        const submitButton = document.getElementById('submit-suggestion-btn');
         const messageInput = suggestionForm.querySelector('#suggestion-text');
         const emailInput = suggestionForm.querySelector('#suggestion-email');
         
         let isValid = true;
         if (messageInput.value.trim() === '') {
-            messageInput.classList.add('input-error'); // Asume que tienes un estilo para .input-error
+            messageInput.parentElement.classList.add('input-error');
             isValid = false;
         } else {
-            messageInput.classList.remove('input-error');
+            messageInput.parentElement.classList.remove('input-error');
         }
 
         if (emailInput.value.trim() === '' || !/^\S+@\S+\.\S+$/.test(emailInput.value)) {
-            emailInput.parentElement.classList.add('input-error'); // Estilo al contenedor
+            emailInput.parentElement.classList.add('input-error');
             isValid = false;
         } else {
             emailInput.parentElement.classList.remove('input-error');
@@ -1459,14 +1459,14 @@ function initializeSuggestionForm() {
 
         if (!isValid) {
             if (navigator.vibrate) navigator.vibrate(100);
-            return; // Detiene el envío si la validación falla
+            return;
         }
 
         const formData = new FormData(suggestionForm);
         const suggestionTypeValue = document.getElementById('suggestion-type-value').value;
         formData.set('suggestion_type', suggestionTypeValue);
 
-        const originalButtonText = submitButton.innerHTML;
+        const originalButtonHTML = submitButton.innerHTML;
         submitButton.innerHTML = '<span class="material-symbols-rounded spinning">progress_activity</span>';
         submitButton.disabled = true;
 
@@ -1480,12 +1480,25 @@ function initializeSuggestionForm() {
 
             if (result.success) {
                 showDynamicIslandNotification('system', 'success', result.message || 'Sugerencia enviada con éxito.', 'notifications');
+                
+                // Reiniciar el formulario y el menú
                 suggestionForm.reset();
-                // Resetear el selector de tipo visualmente
-                document.getElementById('suggestion-type-display').setAttribute('data-translate', 'suggestion_type_improvement');
-                document.getElementById('suggestion-type-display').textContent = getTranslation('suggestion_type_improvement', 'menu');
-                document.getElementById('suggestion-type-value').value = 'improvement';
+                
+                // Resetear visualmente el selector de tipo
+                const typeDisplay = document.getElementById('suggestion-type-display');
+                const typeValueInput = document.getElementById('suggestion-type-value');
+                if(typeDisplay && typeValueInput) {
+                    typeDisplay.setAttribute('data-translate', 'suggestion_type_improvement');
+                    typeDisplay.textContent = getTranslation('suggestion_type_improvement', 'menu');
+                    typeValueInput.value = 'improvement';
+                }
+
+                // Limpiar los indicadores de error
+                messageInput.parentElement.classList.remove('input-error');
+                emailInput.parentElement.classList.remove('input-error');
+                
                 deactivateModule('toggleSuggestionMenu');
+
             } else {
                 showDynamicIslandNotification('system', 'error', result.message || 'Ocurrió un error.', 'notifications');
             }
@@ -1494,12 +1507,14 @@ function initializeSuggestionForm() {
             console.error('Error submitting suggestion:', error);
             showDynamicIslandNotification('system', 'error', 'No se pudo conectar con el servidor.', 'notifications');
         } finally {
-            submitButton.innerHTML = originalButtonText;
+            // Restaurar el botón a su estado original
+            submitButton.innerHTML = originalButtonHTML;
             submitButton.disabled = false;
         }
+        
+        // ----- FIN DE LA MODIFICACIÓN -----
     });
 
-    // Lógica para el botón de cancelar
     const cancelButton = suggestionForm.querySelector('[data-action="cancel-suggestion"]');
     if (cancelButton) {
         cancelButton.addEventListener('click', () => {
@@ -1507,7 +1522,6 @@ function initializeSuggestionForm() {
         });
     }
 
-    // Lógica para actualizar el valor del campo oculto al seleccionar un tipo
     const suggestionTypesMenu = document.querySelector('.menu-suggestion-types');
     if (suggestionTypesMenu) {
         suggestionTypesMenu.addEventListener('click', (e) => {
@@ -1522,6 +1536,7 @@ function initializeSuggestionForm() {
         });
     }
 }
+
 
 // Llama a esta función en la inicialización de tu app.
 document.addEventListener('DOMContentLoaded', initializeSuggestionForm);
